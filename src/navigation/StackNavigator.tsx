@@ -9,6 +9,7 @@ import FeedbackScreen from '../screens/FeedbackScreen';
 import AboutScreen from '../screens/AboutScreen'; 
 import MapScreen from '../screens/MapScreen'; 
 import { RootStackParamList } from '../types/navigation';
+import AppHeader from '../components/AppHeader';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -16,9 +17,18 @@ export default function StackNavigator() {
   return (
     <Stack.Navigator
       initialRouteName="Login"
-      screenOptions={{ headerShown: false }}
+      screenOptions={{
+        headerStyle: { backgroundColor: '#031C26' },
+        headerTitle: () => <AppHeader />,
+        headerTitleAlign: 'center',
+        headerTintColor: '#F2F2F0',
+      }}
     >
-      <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen 
+        name="Login" 
+        component={LoginScreen} 
+        options={{ headerShown: false }} // esconder header na tela de login
+      />
       <Stack.Screen name="Main" component={TabNavigator} />
       <Stack.Screen name="HelpOptions" component={HelpOptionsScreen} />
       <Stack.Screen name="OngDetail" component={OngDetailScreen} />
