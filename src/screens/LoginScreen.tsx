@@ -59,12 +59,14 @@ export default function LoginScreen() {
           <TextInput
             style={styles.input}
             placeholder="Nome"
+            placeholderTextColor={colors.offWhite}
             value={nome}
             onChangeText={setNome}
           />
           <TextInput
             style={styles.input}
             placeholder="CPF"
+            placeholderTextColor={colors.offWhite}
             value={cpf}
             onChangeText={setCpf}
           />
@@ -74,6 +76,7 @@ export default function LoginScreen() {
       <TextInput
         style={styles.input}
         placeholder="E-mail"
+        placeholderTextColor={colors.offWhite}        
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
@@ -85,16 +88,17 @@ export default function LoginScreen() {
         secureTextEntry
         value={password}
         onChangeText={setPassword}
+        placeholderTextColor={colors.offWhite}
       />
 
       {loading ? (
-        <ActivityIndicator size="large" color="#007bff" style={styles.loader} />
+        <ActivityIndicator size="large" color={colors.orange} style={styles.loader} />
       ) : (
-        <Button
-          title={isLogin ? 'Entrar' : 'Cadastrar'}
-          onPress={handleAuth}
-        />
+        <TouchableOpacity style={styles.buttonContainer} onPress={handleAuth} activeOpacity={0.8}>
+          <Text style={styles.buttonText}>{isLogin ? 'Entrar' : 'Cadastrar'}</Text>
+        </TouchableOpacity>
       )}
+
 
       <TouchableOpacity onPress={() => setIsLogin(!isLogin)} disabled={loading}>
         <Text style={styles.toggle}>
@@ -105,16 +109,58 @@ export default function LoginScreen() {
   );
 }
 
+const colors = {
+  darkBlue: '#031C26',
+  offWhite: '#F2F2F0',
+  gold: '#D9C359',
+  orange: '#F2811D',
+  red: '#BF1515',
+};
+
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, justifyContent: 'center' },
-  title: { fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    marginBottom: 10,
-    borderRadius: 5,
+  container: {
+    flex: 1,
+    padding: 20,
+    justifyContent: 'center',
+    backgroundColor: colors.darkBlue,
   },
-  toggle: { color: '#007bff', textAlign: 'center', marginTop: 15 },
-  loader: { marginVertical: 10 },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 24,
+    color: colors.offWhite,
+  },
+  input: {
+    borderWidth: 1.5,
+    borderColor: colors.gold,
+    backgroundColor: colors.darkBlue,
+    color: colors.offWhite,
+    padding: 12,
+    marginBottom: 15,
+    borderRadius: 8,
+    fontSize: 16,
+  },
+  toggle: {
+    color: colors.gold,
+    textAlign: 'center',
+    marginTop: 18,
+    fontWeight: '600',
+  },
+  loader: {
+    marginVertical: 12,
+  },
+  buttonContainer: {
+    backgroundColor: colors.orange,
+    borderRadius: 8,
+    paddingVertical: 14,
+    marginTop: 10,
+  },
+  buttonText: {
+    color: colors.offWhite,
+    fontWeight: 'bold',
+    fontSize: 18,
+    textAlign: 'center',
+  },
 });
+
