@@ -1,6 +1,17 @@
 {
-  "extends": "expo/tsconfig.base",
+  "extends": "node_modules/expo/tsconfig.base",
   "compilerOptions": {
-    "strict": true
+    "strict": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node",
+    "jsx": "react-native",
+    "baseUrl": "src",
+    "paths": {
+      "@screens/*": ["screens/*"],
+      "@components/*": ["components/*"],
+      "@api/*": ["api/*"],
+      "@navigation/*": ["navigation/*"]
+    }
   }
 }
