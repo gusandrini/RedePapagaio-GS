@@ -18,10 +18,6 @@ export default function HomeScreen() {
         <Text style={styles.buttonText}>Chat de Emergência com IA</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Feedback')}>
-        <Text style={styles.buttonText}>Avaliar Aplicativo</Text>
-      </TouchableOpacity>
-
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('OngDetail', {
         id: '0',
         nome: 'ONG Exemplo',
