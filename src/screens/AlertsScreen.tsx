@@ -18,15 +18,18 @@ export default function AlertsScreen() {
   const [alertas, setAlertas] = useState<Alerta[]>([]);
 
   useEffect(() => {
-    // Em versão real: fazer chamada à API
+    // Simula chamada à API para popular os alertas
     setAlertas(mockAlertas);
   }, []);
 
   const getRiscoColor = (risco: Alerta['risco']) => {
     switch (risco) {
-      case 'leve': return '#28a745';
-      case 'moderado': return '#ffc107';
-      case 'grave': return '#dc3545';
+      case 'leve':
+        return '#28a745'; 
+      case 'moderado':
+        return '#ffc107'; 
+      case 'grave':
+        return '#dc3545'; 
     }
   };
 
@@ -51,8 +54,16 @@ export default function AlertsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
-  title: { fontSize: 22, fontWeight: 'bold', textAlign: 'center', marginBottom: 15 },
+  container: {
+    flex: 1,
+    padding: 20,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 15,
+  },
   card: {
     backgroundColor: '#fff',
     padding: 15,
@@ -61,6 +72,12 @@ const styles = StyleSheet.create({
     borderLeftWidth: 8,
     elevation: 2,
   },
-  tipo: { fontSize: 18, fontWeight: 'bold' },
-  regiao: { fontSize: 14, color: '#555' },
+  tipo: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  regiao: {
+    fontSize: 14,
+    color: '#555',
+  },
 });
