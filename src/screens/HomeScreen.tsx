@@ -26,6 +26,11 @@ export default function HomeScreen() {
         <Text style={styles.buttonText}>Visualizar ONG (exemplo)</Text>
       </TouchableOpacity>
 
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Mapa')}>
+        <Text style={styles.buttonText}>Ver ONGs no mapa</Text>
+      </TouchableOpacity>
+
+
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('HelpOptions', {
         cidade: 'Cidade Exemplo',
         problema: 'Enchente'

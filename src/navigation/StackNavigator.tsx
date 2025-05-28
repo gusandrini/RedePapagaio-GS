@@ -6,8 +6,8 @@ import HelpOptionsScreen from '../screens/HelpOptionsScreen';
 import OngDetailScreen from '../screens/OngDetailScreen';
 import ChatIAScreen from '../screens/ChatIAScreen';
 import FeedbackScreen from '../screens/FeedbackScreen';
-import AboutScreen from '../screens/AboutScreen'; // Nova tela "Sobre"
-
+import AboutScreen from '../screens/AboutScreen'; 
+import MapScreen from '../screens/MapScreen'; 
 import { RootStackParamList } from '../types/navigation';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -25,6 +25,7 @@ export default function StackNavigator() {
       <Stack.Screen name="ChatIA" component={ChatIAScreen} />
       <Stack.Screen name="Feedback" component={FeedbackScreen} />
       <Stack.Screen name="About" component={AboutScreen} />
+      <Stack.Screen name="Mapa" component={MapScreen} />
     </Stack.Navigator>
   );
 }

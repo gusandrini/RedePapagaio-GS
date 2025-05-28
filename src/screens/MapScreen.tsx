@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
+  TouchableOpacity,
+  Text,
+} from 'react-native';
 import MapView, { Marker, Region } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-// import api from '../api/api'; // ← habilite quando sua API estiver pronta
+// import api from '../api/api';
 
 type RootStackParamList = {
   OngDetail: { id: string; nome: string; cidade: string };
@@ -43,11 +50,11 @@ export default function MapScreen() {
           longitudeDelta: 0.1,
         });
 
-        // 🔄 Aqui você fará a chamada à API futuramente
+        // Futuro: buscar ONGs da API
         // const response = await api.get('/ongs');
         // setOngs(response.data);
 
-        // MOCK temporário:
+        // Mock de ONGs locais
         setOngs([
           {
             id: '1',
@@ -89,6 +96,11 @@ export default function MapScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Botão de voltar */}
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <Text style={styles.backButtonText}>← Voltar</Text>
+      </TouchableOpacity>
+
       <MapView style={styles.map} region={region} showsUserLocation>
         {ongs.map((ong) => (
           <Marker
@@ -113,5 +125,23 @@ export default function MapScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   map: { flex: 1 },
-  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 40,
+    left: 20,
+    zIndex: 1,
+    backgroundColor: '#000000aa',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+  },
+  backButtonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
 });

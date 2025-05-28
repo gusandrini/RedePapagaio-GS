@@ -7,7 +7,8 @@ export type RootStackParamList = {
   OngDetail: { id: string; nome: string; cidade: string };
   ChatIA: undefined;
   Feedback: undefined;
-   About: undefined;
+  Mapa: undefined; 
+  About: undefined;
 };
 
 export type TabParamList = {
