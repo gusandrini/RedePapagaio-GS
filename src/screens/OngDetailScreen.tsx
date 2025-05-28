@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Button, Alert, ActivityIndicator } from 'react-native';
+import {
+  SafeAreaView,
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
 import { RouteProp, useRoute } from '@react-navigation/native';
 // import api from '../api/api'; // Habilite quando for integrar com backend
 
@@ -17,6 +25,14 @@ interface OngDetalhada {
   telefone: string;
   email: string;
 }
+
+const colors = {
+  darkBlue: '#031C26',
+  offWhite: '#F2F2F0',
+  orange: '#F2811D',
+  gold: '#D9C359',
+  grayLight: '#999',
+};
 
 export default function OngDetailScreen() {
   const route = useRoute<OngDetailRouteProp>();
@@ -52,9 +68,9 @@ export default function OngDetailScreen() {
 
   if (carregando || !detalhes) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007bff" />
-      </View>
+      <SafeAreaView style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.orange} />
+      </SafeAreaView>
     );
   }
 
@@ -63,30 +79,72 @@ export default function OngDetailScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{detalhes.nome}</Text>
-      <Text style={styles.subtitle}>{detalhes.cidade}</Text>
-      <Text style={styles.description}>{detalhes.descricao}</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <Text style={styles.title}>{detalhes.nome}</Text>
+        <Text style={styles.subtitle}>{detalhes.cidade}</Text>
+        <Text style={styles.description}>{detalhes.descricao}</Text>
 
-      <View style={styles.button}>
-        <Button title="Ver contato" onPress={handleContato} />
-      </View>
+        <TouchableOpacity style={styles.button} onPress={handleContato}>
+          <Text style={styles.buttonText}>Ver contato</Text>
+        </TouchableOpacity>
 
-      <View style={styles.button}>
-        <Button
-          title="Mais detalhes"
+        <TouchableOpacity
+          style={styles.button}
           onPress={() => Alert.alert('Em breve!', 'Funcionalidade em desenvolvimento.')}
-        />
+        >
+          <Text style={styles.buttonText}>Mais detalhes</Text>
+        </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 30, justifyContent: 'center', backgroundColor: '#f2f2f2' },
-  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  title: { fontSize: 26, fontWeight: 'bold', textAlign: 'center', marginBottom: 10 },
-  subtitle: { fontSize: 18, textAlign: 'center', marginBottom: 10, color: '#555' },
-  description: { fontSize: 16, textAlign: 'center', marginBottom: 20, color: '#666' },
-  button: { marginVertical: 10 },
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.darkBlue,
+  },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: colors.darkBlue,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  container: {
+    flex: 1,
+    padding: 30,
+    justifyContent: 'center',
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 10,
+    color: colors.gold,
+  },
+  subtitle: {
+    fontSize: 18,
+    textAlign: 'center',
+    marginBottom: 10,
+    color: colors.offWhite,
+  },
+  description: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 20,
+    color: colors.grayLight,
+  },
+  button: {
+    backgroundColor: colors.orange,
+    marginVertical: 10,
+    paddingVertical: 14,
+    borderRadius: 8,
+  },
+  buttonText: {
+    color: colors.offWhite,
+    textAlign: 'center',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
 });

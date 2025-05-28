@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import {
+  SafeAreaView,
   View,
   Text,
   StyleSheet,
@@ -7,7 +8,6 @@ import {
   Alert,
 } from 'react-native';
 import { RouteProp, useRoute } from '@react-navigation/native';
-import { FontAwesome5 } from '@expo/vector-icons';
 
 type HelpOptionsRouteProp = RouteProp<
   { params: { cidade: string; problema: string } },
@@ -18,6 +18,17 @@ const optionsMap: Record<string, string[]> = {
   'Doar itens': ['Alimentos', 'Roupas', 'Produtos de higiene', 'Doar dinheiro'],
   'Ajudar no local': ['Primeiros Socorros', 'Distribuição de Suprimentos', 'Remoção de Entulho'],
   'Compartilhar alerta': ['WhatsApp', 'Facebook', 'Instagram'],
+};
+
+const colors = {
+  darkBlue: '#031C26',
+  offWhite: '#F2F2F0',
+  gold: '#D9C359',
+  orange: '#F2811D',
+  grayLight: '#888',
+  cardBg: '#0b3043',
+  optionBg: '#14394d',
+  optionBorder: '#244b6b',
 };
 
 export default function HelpOptionsScreen() {
@@ -38,10 +49,6 @@ export default function HelpOptionsScreen() {
     setEtapa(3);
 
     if (sub === 'Doar dinheiro') {
-      Alert.alert(
-        'Chave Pix para doação',
-        'Envie sua contribuição para: ajuda@redepapagaio.org'
-      );
     }
   };
 
@@ -56,106 +63,135 @@ export default function HelpOptionsScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      {etapa === 1 && (
-        <>
-          <Text style={styles.title}>Como você deseja ajudar?</Text>
-          <Text style={styles.subtitle}>
-            {cidade} — {problema}
-          </Text>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        {etapa === 1 && (
+          <>
+            <Text style={styles.title}>Como você deseja ajudar?</Text>
+            <Text style={styles.subtitle}>
+              {cidade} — {problema}
+            </Text>
 
-          {Object.keys(optionsMap).map((opcao, idx) => (
-            <TouchableOpacity
-              key={idx}
-              style={styles.option}
-              onPress={() => handlePrimeiraEscolha(opcao)}
-            >
-              <Text style={styles.optionText}>{opcao}</Text>
+            {Object.keys(optionsMap).map((opcao, idx) => (
+              <TouchableOpacity
+                key={idx}
+                style={styles.option}
+                onPress={() => handlePrimeiraEscolha(opcao)}
+              >
+                <Text style={styles.optionText}>{opcao}</Text>
+              </TouchableOpacity>
+            ))}
+          </>
+        )}
+
+        {etapa === 2 && (
+          <>
+            <Text style={styles.title}>
+              Escolha uma forma de {opcaoSelecionada.toLowerCase()}
+            </Text>
+
+            {optionsMap[opcaoSelecionada].map((sub, idx) => (
+              <TouchableOpacity
+                key={idx}
+                style={styles.option}
+                onPress={() => handleSubOpcao(sub)}
+              >
+                <Text style={styles.optionText}>{sub}</Text>
+              </TouchableOpacity>
+            ))}
+
+            <TouchableOpacity style={styles.backButton} onPress={handleVoltar}>
+              <Text style={styles.backText}>Voltar</Text>
             </TouchableOpacity>
-          ))}
-        </>
-      )}
+          </>
+        )}
 
-      {etapa === 2 && (
-        <>
-          <Text style={styles.title}>
-            Escolha uma forma de {opcaoSelecionada.toLowerCase()}
-          </Text>
+        {etapa === 3 && (
+          <>
+            {subOpcao === 'Doar dinheiro' ? (
+              <>
+                <Text style={styles.title}>Doação via Pix</Text>
+                <View style={styles.card}>
+                  <Text style={styles.cardText}>Envie sua contribuição para:</Text>
+                  <Text style={[styles.cardText, { fontWeight: 'bold', fontSize: 18 }]}>
+                    ajuda@redepapagaio.org
+                  </Text>
+                </View>
+                <TouchableOpacity style={styles.backButton} onPress={handleVoltar}>
+                  <Text style={styles.backText}>Voltar</Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <>
+                <Text style={styles.title}>Compareça ao local indicado</Text>
+                <Text style={styles.subtitle}>
+                  Para realizar a ação: <Text style={{ fontWeight: 'bold' }}>{subOpcao}</Text>
+                </Text>
 
-          {optionsMap[opcaoSelecionada].map((sub, idx) => (
-            <TouchableOpacity
-              key={idx}
-              style={styles.option}
-              onPress={() => handleSubOpcao(sub)}
-            >
-              <Text style={styles.optionText}>{sub}</Text>
-            </TouchableOpacity>
-          ))}
+                <View style={styles.card}>
+                  <Text style={styles.cardText}>Endereço:</Text>
+                  <Text style={styles.cardText}>Av. Solidariedade, 123</Text>
+                  <Text style={styles.cardText}>{cidade} - Centro</Text>
+                  <Text style={styles.cardText}>Atendimento: 08h às 18h</Text>
+                </View>
 
-          <TouchableOpacity style={styles.backButton} onPress={handleVoltar}>
-            <Text style={styles.backText}>Voltar</Text>
-          </TouchableOpacity>
-        </>
-      )}
+                <TouchableOpacity style={styles.backButton} onPress={handleVoltar}>
+                  <Text style={styles.backText}>Voltar</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </>
+        )}
 
-      {etapa === 3 && subOpcao !== 'Doar dinheiro' && (
-        <>
-          <Text style={styles.title}>Compareça ao local indicado</Text>
-          <Text style={styles.subtitle}>
-            Para realizar a ação: <Text style={{ fontWeight: 'bold' }}>{subOpcao}</Text>
-          </Text>
-
-          <View style={styles.card}>
-            <Text style={styles.cardText}>Endereço:</Text>
-            <Text style={styles.cardText}>Av. Solidariedade, 123</Text>
-            <Text style={styles.cardText}>{cidade} - Centro</Text>
-            <Text style={styles.cardText}>Atendimento: 08h às 18h</Text>
-          </View>
-
-          <TouchableOpacity style={styles.backButton} onPress={handleVoltar}>
-            <Text style={styles.backText}>Voltar</Text>
-          </TouchableOpacity>
-        </>
-      )}
-    </View>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#000', padding: 20, justifyContent: 'center' },
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.darkBlue,
+  },
+  container: {
+    flex: 1,
+    padding: 20,
+    justifyContent: 'center',
+  },
   title: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#fff',
+    color: colors.gold,
     textAlign: 'center',
     marginBottom: 10,
   },
   subtitle: {
     fontSize: 16,
-    color: '#ccc',
+    color: colors.offWhite,
     textAlign: 'center',
     marginBottom: 20,
   },
   option: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.optionBg,
     padding: 15,
     borderRadius: 8,
     marginBottom: 15,
-    borderColor: '#333',
+    borderColor: colors.optionBorder,
     borderWidth: 1,
   },
   optionText: {
-    color: '#fff',
+    color: colors.offWhite,
     fontSize: 16,
+    textAlign: 'center',
   },
   card: {
-    backgroundColor: '#222',
+    backgroundColor: colors.cardBg,
     padding: 20,
     borderRadius: 10,
     marginVertical: 20,
   },
   cardText: {
-    color: '#fff',
+    color: colors.offWhite,
     fontSize: 16,
     marginBottom: 5,
   },
@@ -164,7 +200,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   backText: {
-    color: '#888',
+    color: colors.grayLight,
     fontSize: 14,
   },
 });

@@ -1,6 +1,6 @@
-// src/screens/FeedbackScreen.tsx
 import React, { useState } from 'react';
 import {
+  SafeAreaView,
   View,
   Text,
   StyleSheet,
@@ -9,6 +9,14 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+
+const colors = {
+  darkBlue: '#031C26',
+  offWhite: '#F2F2F0',
+  gold: '#D9C359',
+  orange: '#F2811D',
+  grayLight: '#ccc',
+};
 
 export default function FeedbackScreen() {
   const [estrelas, setEstrelas] = useState(0);
@@ -28,42 +36,49 @@ export default function FeedbackScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Avalie sua experiência</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Avalie sua experiência</Text>
 
-      <View style={styles.starsContainer}>
-        {[1, 2, 3, 4, 5].map((star) => (
-          <TouchableOpacity key={star} onPress={() => setEstrelas(star)}>
-            <Ionicons
-              name={star <= estrelas ? 'star' : 'star-outline'}
-              size={36}
-              color={star <= estrelas ? '#f5c518' : '#ccc'}
-            />
-          </TouchableOpacity>
-        ))}
+        <View style={styles.starsContainer}>
+          {[1, 2, 3, 4, 5].map((star) => (
+            <TouchableOpacity key={star} onPress={() => setEstrelas(star)}>
+              <Ionicons
+                name={star <= estrelas ? 'star' : 'star-outline'}
+                size={36}
+                color={star <= estrelas ? colors.gold : colors.grayLight}
+              />
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Escreva um comentário (opcional)"
+          placeholderTextColor={colors.offWhite}
+          multiline
+          numberOfLines={4}
+          value={comentario}
+          onChangeText={setComentario}
+          textAlignVertical="top"
+        />
+
+        <TouchableOpacity style={styles.button} onPress={enviarFeedback}>
+          <Text style={styles.buttonText}>Enviar avaliação</Text>
+        </TouchableOpacity>
       </View>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Escreva um comentário (opcional)"
-        multiline
-        numberOfLines={4}
-        value={comentario}
-        onChangeText={setComentario}
-      />
-
-      <TouchableOpacity style={styles.button} onPress={enviarFeedback}>
-        <Text style={styles.buttonText}>Enviar avaliação</Text>
-      </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.darkBlue,
+  },
   container: {
     flex: 1,
     padding: 30,
-    backgroundColor: '#f9f9f9',
     justifyContent: 'center',
   },
   title: {
@@ -71,6 +86,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
+    color: colors.offWhite,
   },
   starsContainer: {
     flexDirection: 'row',
@@ -78,22 +94,23 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   input: {
-    backgroundColor: '#fff',
+    backgroundColor: '#14394d', // tom mais escuro azul para input
     borderRadius: 8,
     padding: 12,
-    borderColor: '#ccc',
+    borderColor: colors.gold,
     borderWidth: 1,
     marginBottom: 20,
-    textAlignVertical: 'top',
+    color: colors.offWhite,
+    fontSize: 16,
   },
   button: {
-    backgroundColor: '#007bff',
+    backgroundColor: colors.orange,
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: 'center',
   },
   buttonText: {
-    color: '#fff',
+    color: colors.offWhite,
     fontSize: 16,
     fontWeight: 'bold',
   },
