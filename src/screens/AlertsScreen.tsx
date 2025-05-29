@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, View, Text, StyleSheet, FlatList } from 'react-native';
+import { SafeAreaView, View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../types/navigation';
 
 interface Alerta {
   id: string;
@@ -24,8 +27,11 @@ const colors = {
   riscoGrave: '#dc3545',
 };
 
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
 export default function AlertsScreen() {
   const [alertas, setAlertas] = useState<Alerta[]>([]);
+  const navigation = useNavigation<NavigationProp>();
 
   useEffect(() => {
     setAlertas(mockAlertas);
@@ -50,13 +56,23 @@ export default function AlertsScreen() {
           data={alertas}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <View style={[styles.card, { borderLeftColor: getRiscoColor(item.risco) }]}>
-              <Text style={styles.tipo}>{item.tipo}</Text>
-              <Text style={styles.regiao}>{item.regiao}</Text>
-              <Text style={[styles.riscoText, { color: getRiscoColor(item.risco) }]}>
-                Risco: {item.risco.toUpperCase()}
-              </Text>
-            </View>
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate('HelpOptions', {
+                  cidade: item.regiao,
+                  problema: item.tipo,
+                })
+              }
+              activeOpacity={0.7}
+            >
+              <View style={[styles.card, { borderLeftColor: getRiscoColor(item.risco) }]}>
+                <Text style={styles.tipo}>{item.tipo}</Text>
+                <Text style={styles.regiao}>{item.regiao}</Text>
+                <Text style={[styles.riscoText, { color: getRiscoColor(item.risco) }]}>
+                  Risco: {item.risco.toUpperCase()}
+                </Text>
+              </View>
+            </TouchableOpacity>
           )}
           showsVerticalScrollIndicator={false}
         />

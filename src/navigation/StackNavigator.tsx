@@ -29,7 +29,7 @@ export default function StackNavigator() {
         component={LoginScreen} 
         options={{ headerShown: false }} // esconder header na tela de login
       />
-      <Stack.Screen name="Main" component={TabNavigator} />
+      <Stack.Screen name="Home" component={TabNavigator} />
       <Stack.Screen name="HelpOptions" component={HelpOptionsScreen} />
       <Stack.Screen name="OngDetail" component={OngDetailScreen} />
       <Stack.Screen name="ChatIA" component={ChatIAScreen} />

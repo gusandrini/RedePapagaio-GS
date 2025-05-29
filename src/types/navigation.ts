@@ -2,13 +2,14 @@
 
 export type RootStackParamList = {
   Login: undefined;
-  Main: undefined;
+  Home: undefined;
   HelpOptions: { cidade: string; problema: string };
   OngDetail: { id: string; nome: string; cidade: string };
   ChatIA: undefined;
   Feedback: undefined;
   Mapa: undefined; 
   About: undefined;
+  Alertas: undefined;
 };
 
 export type TabParamList = {
