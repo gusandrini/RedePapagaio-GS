@@ -5,7 +5,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Alert,
 } from 'react-native';
 import { RouteProp, useRoute } from '@react-navigation/native';
 
@@ -18,6 +17,12 @@ const optionsMap: Record<string, string[]> = {
   'Doar itens': ['Alimentos', 'Roupas', 'Produtos de higiene', 'Doar dinheiro'],
   'Ajudar no local': ['Primeiros Socorros', 'Distribuição de Suprimentos', 'Remoção de Entulho'],
   'Compartilhar alerta': ['WhatsApp', 'Facebook', 'Instagram'],
+};
+
+const enderecosPorCidade: Record<string, string> = {
+  'Niterói': 'Av. Solidariedade, 123',
+  'Osasco': 'Rua da Esperança, 456',
+  'Ouro Preto': 'Praça da União, 789',
 };
 
 const colors = {
@@ -47,9 +52,6 @@ export default function HelpOptionsScreen() {
   const handleSubOpcao = (sub: string) => {
     setSubOpcao(sub);
     setEtapa(3);
-
-    if (sub === 'Doar dinheiro') {
-    }
   };
 
   const handleVoltar = () => {
@@ -130,7 +132,9 @@ export default function HelpOptionsScreen() {
 
                 <View style={styles.card}>
                   <Text style={styles.cardText}>Endereço:</Text>
-                  <Text style={styles.cardText}>Av. Solidariedade, 123</Text>
+                  <Text style={styles.cardText}>
+                    {enderecosPorCidade[cidade] || 'Endereço não disponível'}
+                  </Text>
                   <Text style={styles.cardText}>{cidade} - Centro</Text>
                   <Text style={styles.cardText}>Atendimento: 08h às 18h</Text>
                 </View>
@@ -142,7 +146,6 @@ export default function HelpOptionsScreen() {
             )}
           </>
         )}
-
       </View>
     </SafeAreaView>
   );

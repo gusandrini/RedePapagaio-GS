@@ -24,9 +24,9 @@ type RootStackParamList = {
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'HelpOptions'>;
 
 const mockNotificacoes: Notificacao[] = [
-  { id: '1', cidade: 'Cidade A', estado: 'SP', problema: 'Enchente' },
-  { id: '2', cidade: 'Cidade B', estado: 'RJ', problema: 'Calor extremo' },
-  { id: '3', cidade: 'Cidade C', estado: 'MG', problema: 'Deslizamento' },
+  { id: '1', cidade: 'Osasco', estado: 'SP', problema: 'Enchente' },
+  { id: '2', cidade: 'Niterói', estado: 'RJ', problema: 'Calor extremo' },
+  { id: '3', cidade: 'Ouro Preto', estado: 'MG', problema: 'Deslizamento' },
 ];
 
 const colors = {
