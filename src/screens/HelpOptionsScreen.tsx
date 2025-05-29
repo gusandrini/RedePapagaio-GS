@@ -16,7 +16,6 @@ type HelpOptionsRouteProp = RouteProp<
 const optionsMap: Record<string, string[]> = {
   'Doar itens': ['Alimentos', 'Roupas', 'Produtos de higiene', 'Doar dinheiro'],
   'Ajudar no local': ['Primeiros Socorros', 'Distribuição de Suprimentos', 'Remoção de Entulho'],
-  'Compartilhar alerta': ['WhatsApp', 'Facebook', 'Instagram'],
 };
 
 const enderecosPorCidade: Record<string, string> = {
