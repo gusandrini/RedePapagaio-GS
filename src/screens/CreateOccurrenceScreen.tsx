@@ -8,6 +8,7 @@ import {
   StyleSheet,
   SafeAreaView,
 } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 import api from '../services/api';
@@ -20,27 +21,35 @@ export default function CreateOccurrenceScreen() {
 
   const isEditando = !!route.params?.ocorrencia;
 
-  const [tipo, setTipo] = useState('');
-  const [regiao, setRegiao] = useState('');
   const [descricao, setDescricao] = useState('');
+  const [regiao, setRegiao] = useState('');
+  const [tipos, setTipos] = useState<string[]>([]);
+  const [tipoSelecionado, setTipoSelecionado] = useState<string | null>(null);
 
   useEffect(() => {
+    // Busca os valores do enum
+    api.get<string[]>('/tipos-ocorrencia/enums')
+      .then((res) => setTipos(res.data))
+      .catch(() => Alert.alert('Erro', 'Não foi possível carregar os tipos de ocorrência.'));
+
     const ocorrencia = route.params?.ocorrencia;
     if (ocorrencia) {
-      setTipo(ocorrencia.tipoOcorrencia.dsTipoOcorrencia);
-      setRegiao(ocorrencia.regiao.nmRegiao);
       setDescricao(ocorrencia.dsOcorrencia);
+      setRegiao(ocorrencia.regiao.nmRegiao);
+      setTipoSelecionado(ocorrencia.tipoOcorrencia.nmTipoOcorrencia);
     }
   }, [route.params]);
 
   async function salvarOcorrencia() {
-    if (!tipo || !regiao || !descricao) {
+    if (!tipoSelecionado || !regiao.trim() || !descricao.trim()) {
       Alert.alert('Campos obrigatórios', 'Preencha todos os campos.');
       return;
     }
 
     const payload = {
-      tipoOcorrencia: { dsTipoOcorrencia: tipo },
+      tipoOcorrencia: {
+        nmTipoOcorrencia: tipoSelecionado,
+      },
       regiao: { nmRegiao: regiao },
       dsOcorrencia: descricao,
       statusOcorrencia: { idStatusOcorrencia: 1 },
@@ -71,12 +80,23 @@ export default function CreateOccurrenceScreen() {
           {isEditando ? 'Editar Ocorrência' : 'Nova Ocorrência'}
         </Text>
 
-        <TextInput
-          placeholder="Tipo de ocorrência"
-          style={styles.input}
-          value={tipo}
-          onChangeText={setTipo}
-        />
+        <Text style={styles.label}>Tipo de Ocorrência</Text>
+        <View style={styles.pickerWrapper}>
+          <Picker
+            selectedValue={tipoSelecionado}
+            onValueChange={(itemValue) => setTipoSelecionado(itemValue)}
+          >
+            <Picker.Item label="Selecione o tipo" value={null} />
+            {tipos.map((tipo) => (
+              <Picker.Item
+                key={tipo}
+                label={tipo.replace(/_/g, ' ')}
+                value={tipo}
+              />
+            ))}
+          </Picker>
+        </View>
+
         <TextInput
           placeholder="Região"
           style={styles.input}
@@ -110,6 +130,16 @@ const styles = StyleSheet.create({
     color: '#D9C359',
     marginBottom: 20,
     textAlign: 'center',
+  },
+  label: {
+    color: '#F2F2F0',
+    fontSize: 16,
+    marginBottom: 6,
+  },
+  pickerWrapper: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    marginBottom: 15,
   },
   input: {
     backgroundColor: '#fff',

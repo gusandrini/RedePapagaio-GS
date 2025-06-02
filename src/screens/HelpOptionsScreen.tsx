@@ -1,26 +1,28 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { RouteProp, useRoute } from '@react-navigation/native';
+import api from '../services/api';
 
 type HelpOptionsRouteProp = RouteProp<
   { params: { cidade: string; problema: string } },
   'params'
 >;
 
-const optionsMap: Record<string, string[]> = {
-  'Doar itens': ['Alimentos', 'Roupas', 'Produtos de higiene', 'Doar dinheiro'],
-  'Ajudar no local': ['Primeiros Socorros', 'Distribuição de Suprimentos', 'Remoção de Entulho'],
+const tipoAjudaSubopcoes: Record<string, string[]> = {
+  DOAR_ITENS: ['ALIMENTOS', 'ROUPAS', 'HIGIENE', 'DOAR_DINHEIRO'],
+  AJUDAR_NO_LOCAL: ['PRIMEIROS_SOCORROS', 'SUPRIMENTOS', 'REMOCAO_ENTULHO'],
 };
 
 const enderecosPorCidade: Record<string, string> = {
-  'Niterói': 'Av. Solidariedade, 123',
-  'Osasco': 'Rua da Esperança, 456',
+  Niterói: 'Av. Solidariedade, 123',
+  Osasco: 'Rua da Esperança, 456',
   'Ouro Preto': 'Praça da União, 789',
 };
 
@@ -39,9 +41,17 @@ export default function HelpOptionsScreen() {
   const route = useRoute<HelpOptionsRouteProp>();
   const { cidade, problema } = route.params;
 
+  const [tiposAjuda, setTiposAjuda] = useState<string[]>([]);
   const [etapa, setEtapa] = useState(1);
   const [opcaoSelecionada, setOpcaoSelecionada] = useState('');
   const [subOpcao, setSubOpcao] = useState('');
+
+  useEffect(() => {
+    api
+      .get<string[]>('/tipos-ajuda/enums')
+      .then((res) => setTiposAjuda(res.data))
+      .catch(() => Alert.alert('Erro', 'Não foi possível carregar os tipos de ajuda.'));
+  }, []);
 
   const handlePrimeiraEscolha = (opcao: string) => {
     setOpcaoSelecionada(opcao);
@@ -73,13 +83,13 @@ export default function HelpOptionsScreen() {
               {cidade} — {problema}
             </Text>
 
-            {Object.keys(optionsMap).map((opcao, idx) => (
+            {tiposAjuda.map((opcao) => (
               <TouchableOpacity
-                key={idx}
+                key={opcao}
                 style={styles.option}
                 onPress={() => handlePrimeiraEscolha(opcao)}
               >
-                <Text style={styles.optionText}>{opcao}</Text>
+                <Text style={styles.optionText}>{opcao.replace(/_/g, ' ')}</Text>
               </TouchableOpacity>
             ))}
           </>
@@ -88,16 +98,16 @@ export default function HelpOptionsScreen() {
         {etapa === 2 && (
           <>
             <Text style={styles.title}>
-              Escolha uma forma de {opcaoSelecionada.toLowerCase()}
+              Escolha uma forma de {opcaoSelecionada.replace(/_/g, ' ').toLowerCase()}
             </Text>
 
-            {optionsMap[opcaoSelecionada].map((sub, idx) => (
+            {tipoAjudaSubopcoes[opcaoSelecionada]?.map((sub, idx) => (
               <TouchableOpacity
                 key={idx}
                 style={styles.option}
                 onPress={() => handleSubOpcao(sub)}
               >
-                <Text style={styles.optionText}>{sub}</Text>
+                <Text style={styles.optionText}>{sub.replace(/_/g, ' ')}</Text>
               </TouchableOpacity>
             ))}
 
@@ -109,7 +119,7 @@ export default function HelpOptionsScreen() {
 
         {etapa === 3 && (
           <>
-            {subOpcao === 'Doar dinheiro' ? (
+            {subOpcao === 'DOAR_DINHEIRO' ? (
               <>
                 <Text style={styles.title}>Doação via Pix</Text>
                 <View style={styles.card}>
@@ -118,15 +128,12 @@ export default function HelpOptionsScreen() {
                     ajuda@redepapagaio.org
                   </Text>
                 </View>
-                <TouchableOpacity style={styles.backButton} onPress={handleVoltar}>
-                  <Text style={styles.backText}>Voltar</Text>
-                </TouchableOpacity>
               </>
             ) : (
               <>
                 <Text style={styles.title}>Compareça ao local indicado</Text>
                 <Text style={styles.subtitle}>
-                  Para realizar a ação: <Text style={{ fontWeight: 'bold' }}>{subOpcao}</Text>
+                  Para realizar a ação: <Text style={{ fontWeight: 'bold' }}>{subOpcao.replace(/_/g, ' ')}</Text>
                 </Text>
 
                 <View style={styles.card}>
@@ -137,12 +144,12 @@ export default function HelpOptionsScreen() {
                   <Text style={styles.cardText}>{cidade} - Centro</Text>
                   <Text style={styles.cardText}>Atendimento: 08h às 18h</Text>
                 </View>
-
-                <TouchableOpacity style={styles.backButton} onPress={handleVoltar}>
-                  <Text style={styles.backText}>Voltar</Text>
-                </TouchableOpacity>
               </>
             )}
+
+            <TouchableOpacity style={styles.backButton} onPress={handleVoltar}>
+              <Text style={styles.backText}>Voltar</Text>
+            </TouchableOpacity>
           </>
         )}
       </View>
