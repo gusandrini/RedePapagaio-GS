@@ -19,18 +19,22 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'CreateOccur
 interface Alerta {
   idOcorrencia: number;
   tipoOcorrencia: {
-    dsTipoOcorrencia: string;
+    idTipoOcorrencia: number;
     nmTipoOcorrencia: string;
   };
-  regiao: { nmRegiao: string };
+  regiao: {
+    idRegiao: number;
+    nmRegiao: string;
+  };
   nivelUrgencia: {
-    dsNivelUrgencia: string;
     idNivelUrgencia: number;
+    nmNivel: string; // enum: GRAVE, MODERADO, LEVE
+  };
+  statusOcorrencia: {
+    idStatusOcorrencia: number;
   };
   dsOcorrencia: string;
-  statusOcorrencia: { idStatusOcorrencia: number };
 }
-
 
 const colors = {
   darkBlue: '#031C26',
@@ -50,7 +54,7 @@ export default function AlertsScreen() {
   useEffect(() => {
     async function carregarAlertas() {
       try {
-        const resposta = await api.get('/ocorrencias');
+        const resposta = await api.get('/ocorrencias/todas');
         setAlertas(resposta.data);
       } catch (error) {
         console.error('Erro ao buscar alertas:', error);
@@ -63,38 +67,42 @@ export default function AlertsScreen() {
     carregarAlertas();
   }, []);
 
-  const getRiscoColor = (descricao: string) => {
-    const risco = descricao.toLowerCase();
-    if (risco.includes('leve')) return colors.riscoLeve;
-    if (risco.includes('moderado')) return colors.riscoModerado;
-    if (risco.includes('grave')) return colors.riscoGrave;
-    return colors.offWhite;
+  const getRiscoColor = (nivel: string) => {
+    switch (nivel) {
+      case 'LEVE':
+        return colors.riscoLeve;
+      case 'MODERADO':
+        return colors.riscoModerado;
+      case 'GRAVE':
+        return colors.riscoGrave;
+      default:
+        return colors.offWhite;
+    }
   };
 
-  const mapAlertaToOcorrencia = (
-    alerta: Alerta
-  ): RootStackParamList['CreateOccurrence']['ocorrencia'] => ({
-    idOcorrencia: alerta.idOcorrencia,
-    tipoOcorrencia: {
-      dsTipoOcorrencia: alerta.tipoOcorrencia.dsTipoOcorrencia,
-      nmTipoOcorrencia: alerta.tipoOcorrencia.nmTipoOcorrencia,
-    },
-    regiao: {
-      nmRegiao: alerta.regiao.nmRegiao,
-    },
-    nivelUrgencia: {
-      idNivelUrgencia: alerta.nivelUrgencia.idNivelUrgencia,
-    },
-    statusOcorrencia: {
-      idStatusOcorrencia: alerta.statusOcorrencia.idStatusOcorrencia,
-    },
-    dsOcorrencia: alerta.dsOcorrencia,
-  });
-
+  const formatarStatus = (idStatus: number) => {
+    switch (idStatus) {
+      case 1:
+        return 'Pendente';
+      case 2:
+        return 'Em andamento';
+      case 3:
+        return 'Concluído';
+      default:
+        return `Status ${idStatus}`;
+    }
+  };
 
   const handleEditar = (ocorrencia: Alerta) => {
     navigation.navigate('CreateOccurrence', {
-      ocorrencia: mapAlertaToOcorrencia(ocorrencia),
+      ocorrencia: {
+        idOcorrencia: ocorrencia.idOcorrencia,
+        tipoOcorrencia: ocorrencia.tipoOcorrencia,
+        regiao: ocorrencia.regiao,
+        nivelUrgencia: ocorrencia.nivelUrgencia,
+        statusOcorrencia: ocorrencia.statusOcorrencia,
+        dsOcorrencia: ocorrencia.dsOcorrencia,
+      },
     });
   };
 
@@ -115,7 +123,7 @@ export default function AlertsScreen() {
 
   const excluirOcorrencia = async (id: number) => {
     try {
-      await api.delete(`/ocorrencias/${id}`);
+      await api.delete(`/ocorrencias/remover/${id}`);
       setAlertas((prev) => prev.filter((o) => o.idOcorrencia !== id));
       Alert.alert('Sucesso', 'Ocorrência excluída com sucesso!');
     } catch (error) {
@@ -137,7 +145,7 @@ export default function AlertsScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <Text style={styles.title}>Alertas Ativos</Text>
+        <Text style={styles.title}>Ocorrências</Text>
         <FlatList
           data={alertas}
           keyExtractor={(item) => item.idOcorrencia.toString()}
@@ -145,25 +153,29 @@ export default function AlertsScreen() {
             <View
               style={[
                 styles.card,
-                {
-                  borderLeftColor: getRiscoColor(item.nivelUrgencia.dsNivelUrgencia),
-                },
+                { borderLeftColor: getRiscoColor(item.nivelUrgencia.nmNivel) },
               ]}
             >
-              <Text style={styles.tipo}>{item.tipoOcorrencia.dsTipoOcorrencia}</Text>
-              <Text style={styles.regiao}>{item.regiao.nmRegiao}</Text>
-              <Text
-                style={[styles.riscoText, { color: getRiscoColor(item.nivelUrgencia.dsNivelUrgencia) }]}
-              >
-                Risco: {item.nivelUrgencia.dsNivelUrgencia.toUpperCase()}
+              <Text style={styles.id}>ID: {item.idOcorrencia}</Text>
+              <Text style={styles.tipo}>Tipo: {item.tipoOcorrencia.nmTipoOcorrencia.replace(/_/g, ' ')}</Text>
+              <Text style={styles.regiao}>Região: {item.regiao.nmRegiao}</Text>
+              <Text style={styles.regiao}>
+                Status: {formatarStatus(item.statusOcorrencia.idStatusOcorrencia)}
               </Text>
-              <Text style={styles.regiao}>{item.dsOcorrencia}</Text>
+              <Text
+                style={[
+                  styles.riscoText,
+                  { color: getRiscoColor(item.nivelUrgencia.nmNivel) },
+                ]}
+              >
+                Nível: {item.nivelUrgencia.nmNivel}
+              </Text>
+              <Text style={styles.regiao}>Descrição: {item.dsOcorrencia}</Text>
 
               <View style={styles.buttonRow}>
                 <TouchableOpacity onPress={() => handleEditar(item)}>
                   <Text style={styles.editButton}>✏️ Editar</Text>
                 </TouchableOpacity>
-
                 <TouchableOpacity onPress={() => confirmarExclusao(item.idOcorrencia)}>
                   <Text style={styles.deleteButton}>🗑️ Excluir</Text>
                 </TouchableOpacity>
@@ -178,14 +190,8 @@ export default function AlertsScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.darkBlue,
-  },
-  container: {
-    flex: 1,
-    padding: 20,
-  },
+  safeArea: { flex: 1, backgroundColor: colors.darkBlue },
+  container: { flex: 1, padding: 20 },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -201,31 +207,15 @@ const styles = StyleSheet.create({
     borderLeftWidth: 8,
     elevation: 3,
   },
-  tipo: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.offWhite,
-  },
-  regiao: {
-    fontSize: 14,
-    color: colors.offWhite,
-    marginBottom: 6,
-  },
-  riscoText: {
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
+  id: { color: colors.offWhite, fontWeight: 'bold' },
+  tipo: { fontSize: 18, fontWeight: 'bold', color: colors.offWhite },
+  regiao: { fontSize: 14, color: colors.offWhite, marginBottom: 4 },
+  riscoText: { fontWeight: 'bold', fontSize: 14 },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 10,
   },
-  editButton: {
-    color: colors.gold,
-    fontWeight: 'bold',
-  },
-  deleteButton: {
-    color: colors.riscoGrave,
-    fontWeight: 'bold',
-  },
+  editButton: { color: colors.gold, fontWeight: 'bold' },
+  deleteButton: { color: colors.riscoGrave, fontWeight: 'bold' },
 });

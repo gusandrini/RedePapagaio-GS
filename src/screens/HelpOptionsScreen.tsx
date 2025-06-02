@@ -1,232 +1,202 @@
-import React, { useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
+  ScrollView,
   View,
   Text,
+  TextInput,
   StyleSheet,
-  FlatList,
-  ActivityIndicator,
   Alert,
   TouchableOpacity,
 } from 'react-native';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../types/navigation';
+import { Picker } from '@react-native-picker/picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../services/api';
 
-type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'CreateOccurrence'>;
-
-interface Alerta {
+interface Ocorrencia {
   idOcorrencia: number;
-  tipoOcorrencia: { dsTipoOcorrencia: string };
-  regiao: { nmRegiao: string };
-  nivelUrgencia: { dsNivelUrgencia: string; idNivelUrgencia: number };
   dsOcorrencia: string;
-  statusOcorrencia: { idStatusOcorrencia: number };
+}
+
+interface TipoAjuda {
+  idTipoAjuda: number;
+  nmTipoAjuda: string; // Enum textual
 }
 
 const colors = {
   darkBlue: '#031C26',
-  cardBg: '#0b3043',
   offWhite: '#F2F2F0',
   gold: '#D9C359',
-  riscoLeve: '#28a745',
-  riscoModerado: '#ffc107',
-  riscoGrave: '#dc3545',
+  orange: '#F2811D',
+  red: '#BF1515',
+  grayLight: '#ccc',
 };
 
-export default function AlertsScreen() {
-  const navigation = useNavigation<NavigationProp>();
-  const [alertas, setAlertas] = useState<Alerta[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function HelpOptionsScreen() {
+  const [usuarioId, setUsuarioId] = useState<string | null>(null);
+  const [ocorrencias, setOcorrencias] = useState<Ocorrencia[]>([]);
+  const [tiposAjuda, setTiposAjuda] = useState<TipoAjuda[]>([]);
 
-  useFocusEffect(
-    useCallback(() => {
-      let isActive = true;
+  const [ocorrenciaSelecionada, setOcorrenciaSelecionada] = useState<number | null>(null);
+  const [tipoAjudaSelecionado, setTipoAjudaSelecionado] = useState<number | null>(null);
+  const [descricao, setDescricao] = useState('');
 
-      async function carregarAlertas() {
-        setLoading(true);
-        try {
-          const resposta = await api.get('/ocorrencias');
-          if (isActive) setAlertas(resposta.data);
-        } catch (error) {
-          console.error('Erro ao buscar alertas:', error);
-          Alert.alert('Erro', 'Não foi possível carregar os alertas.');
-        } finally {
-          setLoading(false);
-        }
+  useEffect(() => {
+    async function carregarDados() {
+      try {
+        const id = await AsyncStorage.getItem('usuarioId');
+        setUsuarioId(id);
+
+        const ocorrenciasResp = await api.get('/ocorrencias');
+        setOcorrencias(ocorrenciasResp.data);
+
+        const tiposAjudaResp = await api.get('/tipos-ajuda/todos');
+        setTiposAjuda(tiposAjudaResp.data);
+
+      } catch (error) {
+        Alert.alert('Erro', 'Falha ao carregar dados iniciais.');
+        console.error(error);
       }
+    }
 
-      carregarAlertas();
+    carregarDados();
+  }, []);
 
-      return () => {
-        isActive = false;
-      };
-    }, [])
-  );
+  const handleEnviarAjuda = async () => {
+    if (!usuarioId || !ocorrenciaSelecionada || !tipoAjudaSelecionado || !descricao.trim()) {
+      Alert.alert('Erro', 'Preencha todos os campos obrigatórios.');
+      return;
+    }
 
-  const getRiscoColor = (descricao: string) => {
-    const risco = descricao.toLowerCase();
-    if (risco.includes('leve')) return colors.riscoLeve;
-    if (risco.includes('moderado')) return colors.riscoModerado;
-    if (risco.includes('grave')) return colors.riscoGrave;
-    return colors.offWhite;
-  };
+    const payload = {
+      usuario: { idUsuario: Number(usuarioId) },
+      ocorrencia: { idOcorrencia: ocorrenciaSelecionada },
+      tipoAjuda: { idTipoAjuda: tipoAjudaSelecionado },
+      dsAjuda: descricao,
+      dtAjuda: new Date().toISOString().split('T')[0], // yyyy-MM-dd
+    };
 
-  const handleEditar = (alerta: Alerta) => {
-    navigation.navigate('CreateOccurrence', {
-      ocorrencia: {
-        idOcorrencia: alerta.idOcorrencia,
-        tipoOcorrencia: {
-          dsTipoOcorrencia: alerta.tipoOcorrencia.dsTipoOcorrencia,
-          nmTipoOcorrencia: alerta.tipoOcorrencia.dsTipoOcorrencia, // mesmo valor, se só vier um
-        },
-        regiao: {
-          nmRegiao: alerta.regiao.nmRegiao,
-        },
-        nivelUrgencia: {
-          idNivelUrgencia: alerta.nivelUrgencia.idNivelUrgencia,
-        },
-        statusOcorrencia: {
-          idStatusOcorrencia: alerta.statusOcorrencia.idStatusOcorrencia,
-        },
-        dsOcorrencia: alerta.dsOcorrencia,
-      },
-    });
-  };
-
-
-  const confirmarExclusao = (id: number) => {
-    Alert.alert(
-      'Confirmar exclusão',
-      'Tem certeza que deseja excluir esta ocorrência?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Excluir',
-          style: 'destructive',
-          onPress: () => excluirOcorrencia(id),
-        },
-      ]
-    );
-  };
-
-  const excluirOcorrencia = async (id: number) => {
     try {
-      await api.delete(`/ocorrencias/${id}`);
-      setAlertas((prev) => prev.filter((o) => o.idOcorrencia !== id));
-      Alert.alert('Sucesso', 'Ocorrência excluída com sucesso!');
+      await api.post('/ajudas/inserir', payload);
+      Alert.alert('Sucesso', 'Ajuda registrada com sucesso!');
+      setOcorrenciaSelecionada(null);
+      setTipoAjudaSelecionado(null);
+      setDescricao('');
     } catch (error) {
-      console.error('Erro ao excluir ocorrência:', error);
-      Alert.alert('Erro', 'Falha ao excluir ocorrência.');
+      Alert.alert('Erro', 'Falha ao registrar ajuda.');
+      console.error(error);
     }
   };
 
-  if (loading) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.container}>
-          <ActivityIndicator size="large" color={colors.gold} />
-        </View>
-      </SafeAreaView>
-    );
-  }
-
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <Text style={styles.title}>Alertas Ativos</Text>
-        <FlatList
-          data={alertas}
-          keyExtractor={(item) => item.idOcorrencia.toString()}
-          renderItem={({ item }) => (
-            <View
-              style={[
-                styles.card,
-                {
-                  borderLeftColor: getRiscoColor(item.nivelUrgencia.dsNivelUrgencia),
-                },
-              ]}
-            >
-              <Text style={styles.tipo}>{item.tipoOcorrencia.dsTipoOcorrencia}</Text>
-              <Text style={styles.regiao}>{item.regiao.nmRegiao}</Text>
-              <Text
-                style={[
-                  styles.riscoText,
-                  { color: getRiscoColor(item.nivelUrgencia.dsNivelUrgencia) },
-                ]}
-              >
-                Risco: {item.nivelUrgencia.dsNivelUrgencia.toUpperCase()}
-              </Text>
-              <Text style={styles.regiao}>{item.dsOcorrencia}</Text>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>Registrar Ajuda</Text>
 
-              <View style={styles.buttonRow}>
-                <TouchableOpacity onPress={() => handleEditar(item)}>
-                  <Text style={styles.editButton}>✏️ Editar</Text>
-                </TouchableOpacity>
+        <Text style={styles.label}>Ocorrência:</Text>
+        <View style={styles.pickerWrapper}>
+          <Picker
+            selectedValue={ocorrenciaSelecionada}
+            onValueChange={(value) => setOcorrenciaSelecionada(value)}
+            style={styles.picker}
+            dropdownIconColor={colors.gold}
+          >
+            <Picker.Item label="Selecione uma ocorrência..." value={null} />
+            {ocorrencias.map((oc) => (
+              <Picker.Item
+                key={oc.idOcorrencia}
+                label={`#${oc.idOcorrencia} - ${oc.dsOcorrencia}`}
+                value={oc.idOcorrencia}
+              />
+            ))}
+          </Picker>
+        </View>
 
-                <TouchableOpacity onPress={() => confirmarExclusao(item.idOcorrencia)}>
-                  <Text style={styles.deleteButton}>🗑️ Excluir</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
-          showsVerticalScrollIndicator={false}
+        <Text style={styles.label}>Tipo de Ajuda:</Text>
+        <View style={styles.pickerWrapper}>
+          <Picker
+            selectedValue={tipoAjudaSelecionado}
+            onValueChange={(value) => setTipoAjudaSelecionado(value)}
+            style={styles.picker}
+            dropdownIconColor={colors.gold}
+          >
+            <Picker.Item label="Selecione o tipo de ajuda..." value={null} />
+            {tiposAjuda.map((tipo) => (
+              <Picker.Item
+                key={tipo.idTipoAjuda}
+                label={tipo.nmTipoAjuda.replace('_', ' ')}
+                value={tipo.idTipoAjuda}
+              />
+            ))}
+          </Picker>
+        </View>
+
+        <Text style={styles.label}>Descrição:</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Descreva a ajuda prestada"
+          placeholderTextColor={colors.grayLight}
+          value={descricao}
+          onChangeText={setDescricao}
+          multiline
+          numberOfLines={4}
         />
-      </View>
+
+        <TouchableOpacity style={styles.button} onPress={handleEnviarAjuda}>
+          <Text style={styles.buttonText}>Enviar Ajuda</Text>
+        </TouchableOpacity>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.darkBlue,
-  },
-  container: {
-    flex: 1,
-    padding: 20,
-  },
+  safeArea: { flex: 1, backgroundColor: colors.darkBlue },
+  container: { flexGrow: 1, padding: 20 },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     color: colors.gold,
     textAlign: 'center',
-    marginBottom: 15,
+    marginBottom: 20,
   },
-  card: {
-    backgroundColor: colors.cardBg,
-    padding: 15,
-    marginBottom: 12,
-    borderRadius: 8,
-    borderLeftWidth: 8,
-    elevation: 3,
-  },
-  tipo: {
-    fontSize: 18,
-    fontWeight: 'bold',
+  label: {
     color: colors.offWhite,
-  },
-  regiao: {
-    fontSize: 14,
-    color: colors.offWhite,
-    marginBottom: 6,
-  },
-  riscoText: {
     fontWeight: 'bold',
-    fontSize: 14,
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    marginBottom: 4,
     marginTop: 10,
   },
-  editButton: {
-    color: colors.gold,
-    fontWeight: 'bold',
+  input: {
+    borderWidth: 1,
+    borderColor: colors.gold,
+    borderRadius: 8,
+    padding: 12,
+    backgroundColor: '#14394d',
+    color: colors.offWhite,
+    textAlignVertical: 'top',
   },
-  deleteButton: {
-    color: colors.riscoGrave,
+  pickerWrapper: {
+    borderWidth: 1,
+    borderColor: colors.gold,
+    borderRadius: 8,
+    overflow: 'hidden',
+    backgroundColor: '#14394d',
+    marginBottom: 10,
+  },
+  picker: {
+    color: colors.offWhite,
+    height: 44,
+  },
+  button: {
+    backgroundColor: colors.orange,
+    borderRadius: 8,
+    paddingVertical: 14,
+    marginTop: 20,
+  },
+  buttonText: {
+    color: colors.offWhite,
     fontWeight: 'bold',
+    fontSize: 18,
+    textAlign: 'center',
   },
 });
