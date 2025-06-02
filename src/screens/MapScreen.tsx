@@ -11,7 +11,6 @@ import MapView, { Marker, Region } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-// import api from '../api/api';
 
 type RootStackParamList = {
   OngDetail: { id: string; nome: string; cidade: string };
@@ -33,6 +32,42 @@ export default function MapScreen() {
   const [ongs, setOngs] = useState<Ong[]>([]);
   const [carregando, setCarregando] = useState(true);
 
+  const gerarOngsProporcionais = () => {
+    const estados = [
+      { sigla: 'SP', cidade: 'São Paulo', base: [-23.55, -46.63], peso: 4 },
+      { sigla: 'RJ', cidade: 'Rio de Janeiro', base: [-22.90, -43.17], peso: 2 },
+      { sigla: 'MG', cidade: 'Belo Horizonte', base: [-19.92, -43.94], peso: 3 },
+      { sigla: 'BA', cidade: 'Salvador', base: [-12.97, -38.51], peso: 3 },
+      { sigla: 'AM', cidade: 'Manaus', base: [-3.11, -60.02], peso: 5 },
+      { sigla: 'SE', cidade: 'Aracaju', base: [-10.91, -37.07], peso: 1 },
+      { sigla: 'RS', cidade: 'Porto Alegre', base: [-30.03, -51.23], peso: 2 },
+      { sigla: 'PA', cidade: 'Belém', base: [-1.46, -48.48], peso: 2 },
+      { sigla: 'PE', cidade: 'Recife', base: [-8.05, -34.9], peso: 2 },
+      { sigla: 'CE', cidade: 'Fortaleza', base: [-3.73, -38.52], peso: 2 },
+    ];
+
+    let idCounter = 1;
+    const novasOngs: Ong[] = [];
+
+    estados.forEach((estado) => {
+      const quantidade = Math.max(1, estado.peso);
+      for (let i = 0; i < quantidade; i++) {
+        const deslocLat = (Math.random() - 0.5) * 0.2;
+        const deslocLng = (Math.random() - 0.5) * 0.2;
+
+        novasOngs.push({
+          id: String(idCounter++),
+          nome: `ONG ${estado.sigla} ${i + 1}`,
+          cidade: estado.cidade,
+          latitude: estado.base[0] + deslocLat,
+          longitude: estado.base[1] + deslocLng,
+        });
+      }
+    });
+
+    setOngs(novasOngs);
+  };
+
   useEffect(() => {
     (async () => {
       try {
@@ -50,34 +85,7 @@ export default function MapScreen() {
           longitudeDelta: 0.1,
         });
 
-        // Futuro: buscar ONGs da API
-        // const response = await api.get('/ongs');
-        // setOngs(response.data);
-
-        // Mock de ONGs locais
-        setOngs([
-          {
-            id: '1',
-            nome: 'ONG Vida Plena',
-            latitude: -23.55052,
-            longitude: -46.633308,
-            cidade: 'São Paulo',
-          },
-          {
-            id: '2',
-            nome: 'Ajuda RJ',
-            latitude: -22.9068,
-            longitude: -43.1729,
-            cidade: 'Rio de Janeiro',
-          },
-          {
-            id: '3',
-            nome: 'Solidariedade BH',
-            latitude: -19.9167,
-            longitude: -43.9345,
-            cidade: 'Belo Horizonte',
-          },
-        ]);
+        gerarOngsProporcionais();
       } catch (error) {
         Alert.alert('Erro', 'Não foi possível carregar o mapa ou as ONGs.');
       } finally {
@@ -96,7 +104,6 @@ export default function MapScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Botão de voltar */}
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <Text style={styles.backButtonText}>← Voltar</Text>
       </TouchableOpacity>

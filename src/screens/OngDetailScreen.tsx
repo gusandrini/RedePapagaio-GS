@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   SafeAreaView,
   View,
@@ -6,25 +6,14 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
-  ActivityIndicator,
 } from 'react-native';
 import { RouteProp, useRoute } from '@react-navigation/native';
-// import api from '../api/api'; // Habilite quando for integrar com backend
 
 type RootStackParamList = {
   OngDetail: { id: string; nome: string; cidade: string };
 };
 
 type OngDetailRouteProp = RouteProp<RootStackParamList, 'OngDetail'>;
-
-interface OngDetalhada {
-  id: string;
-  nome: string;
-  cidade: string;
-  descricao: string;
-  telefone: string;
-  email: string;
-}
 
 const colors = {
   darkBlue: '#031C26',
@@ -38,52 +27,21 @@ export default function OngDetailScreen() {
   const route = useRoute<OngDetailRouteProp>();
   const { id, nome, cidade } = route.params;
 
-  const [detalhes, setDetalhes] = useState<OngDetalhada | null>(null);
-  const [carregando, setCarregando] = useState(true);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        // Exemplo de chamada real:
-        // const response = await api.get(`/ongs/${id}`);
-        // setDetalhes(response.data);
-
-        // Mock simulado:
-        setTimeout(() => {
-          setDetalhes({
-            id,
-            nome,
-            cidade,
-            descricao: 'ONG atuante em causas sociais e emergenciais.',
-            telefone: '(11) 98765-4321',
-            email: 'contato@ongvidaplena.org',
-          });
-          setCarregando(false);
-        }, 1000);
-      } catch (error) {
-        Alert.alert('Erro', 'Não foi possível carregar os dados da ONG.');
-      }
-    })();
-  }, []);
-
-  if (carregando || !detalhes) {
-    return (
-      <SafeAreaView style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={colors.orange} />
-      </SafeAreaView>
-    );
-  }
+  // Geração dinâmica de dados simulados
+  const email = `contato@${nome.toLowerCase().replace(/\s/g, '')}.org`;
+  const telefone = `(11) 9${id.padStart(4, '0')}000-0000`;
+  const descricao = 'ONG atuante em causas sociais, emergenciais e apoio comunitário em situações extremas.';
 
   const handleContato = () => {
-    Alert.alert('Contato', `Email: ${detalhes.email}\nTelefone: ${detalhes.telefone}`);
+    Alert.alert('Contato', `Email: ${email}\nTelefone: ${telefone}`);
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <Text style={styles.title}>{detalhes.nome}</Text>
-        <Text style={styles.subtitle}>{detalhes.cidade}</Text>
-        <Text style={styles.description}>{detalhes.descricao}</Text>
+        <Text style={styles.title}>{nome}</Text>
+        <Text style={styles.subtitle}>{cidade}</Text>
+        <Text style={styles.description}>{descricao}</Text>
 
         <TouchableOpacity style={styles.button} onPress={handleContato}>
           <Text style={styles.buttonText}>Ver contato</Text>
@@ -104,12 +62,6 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: colors.darkBlue,
-  },
-  loadingContainer: {
-    flex: 1,
-    backgroundColor: colors.darkBlue,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   container: {
     flex: 1,
