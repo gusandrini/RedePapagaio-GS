@@ -9,10 +9,10 @@ import {
   Alert,
   TouchableOpacity,
 } from 'react-native';
-import api from '../services/api';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
+import api from '../services/api';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'CreateOccurrence'>;
 

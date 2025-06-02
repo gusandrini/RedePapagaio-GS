@@ -42,7 +42,7 @@ export default function LoginScreen() {
         Alert.alert('Cadastro realizado com sucesso!');
       }
 
-      navigation.navigate('Main');
+      navigation.navigate('Home');
     } catch (error) {
       Alert.alert('Erro', 'Verifique seus dados e tente novamente.');
     } finally {

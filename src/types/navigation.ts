@@ -1,14 +1,15 @@
 export type RootStackParamList = {
   Login: undefined;
-  Main: undefined;
+  Home: undefined;
   HelpOptions: { cidade: string; problema: string };
   OngDetail: { id: string; nome: string; cidade: string };
   ChatIA: undefined;
   Feedback: undefined;
   Mapa: undefined;
   About: undefined;
+  Alertas: undefined;
 
-  // NOVO: rota para criar ou editar ocorrência
+  // Rota para criar ou editar ocorrência
   CreateOccurrence: {
     ocorrencia?: {
       idOcorrencia: number;

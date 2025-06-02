@@ -19,11 +19,19 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <Text style={styles.title}>Bem-vindo(a) à RedePapagaio 🦜</Text>
         <Text style={styles.subtitle}>Conectando ajuda em situações extremas</Text>
 
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('ChatIA')}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('ChatIA')}
+          accessibilityLabel="Ir para chat de emergência com IA"
+        >
           <Text style={styles.buttonText}>Chat de Emergência com IA</Text>
         </TouchableOpacity>
 
@@ -36,22 +44,24 @@ export default function HomeScreen() {
               cidade: 'São Paulo',
             })
           }
+          accessibilityLabel="Visualizar ONG exemplo"
         >
           <Text style={styles.buttonText}>Visualizar ONG (exemplo)</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Mapa')}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('Mapa')}
+          accessibilityLabel="Ver ONGs no mapa"
+        >
           <Text style={styles.buttonText}>Ver ONGs no mapa</Text>
         </TouchableOpacity>
 
+        {/* Botão principal destacado */}
         <TouchableOpacity
-          style={styles.button}
-          onPress={() =>
-            navigation.navigate('HelpOptions', {
-              cidade: 'Cidade Exemplo',
-              problema: 'Enchente',
-            })
-          }
+          style={[styles.button, styles.primaryButton]}
+          onPress={() => navigation.navigate('Alertas')}
+          accessibilityLabel="Selecionar cidade para ajudar agora"
         >
           <Text style={styles.buttonText}>Quero Ajudar Agora</Text>
         </TouchableOpacity>
@@ -69,7 +79,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: 24,
   },
   title: {
     fontSize: 28,
@@ -82,7 +92,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: colors.gold,
     textAlign: 'center',
-    marginBottom: 30,
+    marginBottom: 40,
     fontWeight: '600',
   },
   button: {
@@ -92,11 +102,15 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     marginVertical: 10,
     width: '100%',
+    maxWidth: 400,
     shadowColor: colors.darkBlue,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
+  },
+  primaryButton: {
+    backgroundColor: colors.red,
   },
   buttonText: {
     color: colors.offWhite,

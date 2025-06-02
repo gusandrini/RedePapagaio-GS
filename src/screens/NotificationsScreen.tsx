@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   SafeAreaView,
   View,
@@ -7,7 +7,6 @@ import {
   FlatList,
   TouchableOpacity,
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
@@ -25,52 +24,29 @@ type RootStackParamList = {
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'HelpOptions'>;
 
 const mockNotificacoes: Notificacao[] = [
-  { id: '1', cidade: 'Cidade A', estado: 'SP', problema: 'Enchente' },
-  { id: '2', cidade: 'Cidade B', estado: 'RJ', problema: 'Calor extremo' },
-  { id: '3', cidade: 'Cidade C', estado: 'MG', problema: 'Deslizamento' },
+  { id: '1', cidade: 'Osasco', estado: 'SP', problema: 'Enchente' },
+  { id: '2', cidade: 'Niterói', estado: 'RJ', problema: 'Calor extremo' },
+  { id: '3', cidade: 'Ouro Preto', estado: 'MG', problema: 'Deslizamento' },
 ];
 
 const colors = {
   darkBlue: '#031C26',
   offWhite: '#F2F2F0',
   gold: '#D9C359',
-  orange: '#F2811D',
-  cardBg: '#0b3043',
   buttonBg: '#F2811D',
-  pickerBg: '#14394d',
-  pickerBorder: '#244b6b',
+  cardBg: '#0b3043',
 };
 
 export default function NotificationsScreen() {
-  const [estadoSelecionado, setEstadoSelecionado] = useState('');
   const navigation = useNavigation<NavigationProp>();
-
-  const notificacoesFiltradas = estadoSelecionado
-    ? mockNotificacoes.filter((n) => n.estado === estadoSelecionado)
-    : mockNotificacoes;
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <Text style={styles.title}>Pedidos por Cidade</Text>
 
-        <View style={styles.pickerWrapper}>
-          <Picker
-            selectedValue={estadoSelecionado}
-            onValueChange={(value) => setEstadoSelecionado(value)}
-            style={styles.picker}
-            dropdownIconColor={colors.gold}
-            dropdownIconRippleColor={colors.gold}
-          >
-            <Picker.Item label="Filtrar por estado" value="" color={colors.offWhite} />
-            <Picker.Item label="SP" value="SP" color={colors.offWhite} />
-            <Picker.Item label="RJ" value="RJ" color={colors.offWhite} />
-            <Picker.Item label="MG" value="MG" color={colors.offWhite} />
-          </Picker>
-        </View>
-
         <FlatList
-          data={notificacoesFiltradas}
+          data={mockNotificacoes}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <View style={styles.card}>
@@ -113,18 +89,6 @@ const styles = StyleSheet.create({
     color: colors.gold,
     textAlign: 'center',
     marginBottom: 15,
-  },
-  pickerWrapper: {
-    backgroundColor: colors.pickerBg,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors.pickerBorder,
-    marginBottom: 15,
-    overflow: 'hidden',
-  },
-  picker: {
-    color: colors.offWhite,
-    height: 44,
   },
   card: {
     backgroundColor: colors.cardBg,
