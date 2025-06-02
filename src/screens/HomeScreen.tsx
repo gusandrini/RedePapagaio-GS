@@ -35,7 +35,6 @@ export default function HomeScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>Bem-vindo(a) à RedePapagaio 🦜</Text>
         <Text style={styles.subtitle}>Conectando ajuda em situações extremas</Text>
 
         <View style={styles.menuContainer}>
@@ -70,13 +69,6 @@ export default function HomeScreen() {
             onPress={() => navigation.navigate('WhatsApp')}
           >
             <Text style={styles.buttonText}>📱 Comunidade (WhatsApp)</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.button, styles.primaryButton]}
-            onPress={() => navigation.navigate('Notifications')}
-          >
-            <Text style={styles.buttonText}>📍 Pedidos por Cidade</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

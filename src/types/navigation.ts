@@ -1,4 +1,3 @@
-// navigation.ts (corrigido e unificado)
 export type RootStackParamList = {
   Login: undefined;
   Home: undefined;
@@ -7,7 +6,6 @@ export type RootStackParamList = {
   OngDetail: { id: string; nome: string; cidade: string };
   ChatIA: undefined;
   Mapa: undefined;
-  Notifications: undefined;
   CreateOccurrence: {
     ocorrencia?: {
       idOcorrencia: number;
