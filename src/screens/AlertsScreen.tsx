@@ -1,18 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, View, Text, StyleSheet, FlatList } from 'react-native';
+import {
+  SafeAreaView,
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
+import api from '../services/api';
 
 interface Alerta {
-  id: string;
-  tipo: string;
-  regiao: string;
-  risco: 'leve' | 'moderado' | 'grave';
+  idOcorrencia: number;
+  tipoOcorrencia: { dsTipoOcorrencia: string };
+  regiao: { nmRegiao: string };
+  nivelUrgencia: { dsNivelUrgencia: string };
+  dsOcorrencia: string;
 }
-
-const mockAlertas: Alerta[] = [
-  { id: '1', tipo: 'Enchente', regiao: 'São Paulo - SP', risco: 'grave' },
-  { id: '2', tipo: 'Calor Extremo', regiao: 'Rio de Janeiro - RJ', risco: 'moderado' },
-  { id: '3', tipo: 'Deslizamento', regiao: 'Belo Horizonte - MG', risco: 'leve' },
-];
 
 const colors = {
   darkBlue: '#031C26',
@@ -26,21 +30,41 @@ const colors = {
 
 export default function AlertsScreen() {
   const [alertas, setAlertas] = useState<Alerta[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setAlertas(mockAlertas);
+    async function carregarAlertas() {
+      try {
+        const resposta = await api.get('/ocorrencias');
+        setAlertas(resposta.data);
+      } catch (error) {
+        console.error('Erro ao buscar alertas:', error);
+        Alert.alert('Erro', 'Não foi possível carregar os alertas.');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    carregarAlertas();
   }, []);
 
-  const getRiscoColor = (risco: Alerta['risco']) => {
-    switch (risco) {
-      case 'leve':
-        return colors.riscoLeve;
-      case 'moderado':
-        return colors.riscoModerado;
-      case 'grave':
-        return colors.riscoGrave;
-    }
+  const getRiscoColor = (descricao: string) => {
+    const risco = descricao.toLowerCase();
+    if (risco.includes('leve')) return colors.riscoLeve;
+    if (risco.includes('moderado')) return colors.riscoModerado;
+    if (risco.includes('grave')) return colors.riscoGrave;
+    return colors.offWhite;
   };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.container}>
+          <ActivityIndicator size="large" color={colors.gold} />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -48,14 +72,27 @@ export default function AlertsScreen() {
         <Text style={styles.title}>Alertas Ativos</Text>
         <FlatList
           data={alertas}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.idOcorrencia.toString()}
           renderItem={({ item }) => (
-            <View style={[styles.card, { borderLeftColor: getRiscoColor(item.risco) }]}>
-              <Text style={styles.tipo}>{item.tipo}</Text>
-              <Text style={styles.regiao}>{item.regiao}</Text>
-              <Text style={[styles.riscoText, { color: getRiscoColor(item.risco) }]}>
-                Risco: {item.risco.toUpperCase()}
+            <View
+              style={[
+                styles.card,
+                {
+                  borderLeftColor: getRiscoColor(item.nivelUrgencia.dsNivelUrgencia),
+                },
+              ]}
+            >
+              <Text style={styles.tipo}>{item.tipoOcorrencia.dsTipoOcorrencia}</Text>
+              <Text style={styles.regiao}>{item.regiao.nmRegiao}</Text>
+              <Text
+                style={[
+                  styles.riscoText,
+                  { color: getRiscoColor(item.nivelUrgencia.dsNivelUrgencia) },
+                ]}
+              >
+                Risco: {item.nivelUrgencia.dsNivelUrgencia.toUpperCase()}
               </Text>
+              <Text style={styles.regiao}>{item.dsOcorrencia}</Text>
             </View>
           )}
           showsVerticalScrollIndicator={false}
