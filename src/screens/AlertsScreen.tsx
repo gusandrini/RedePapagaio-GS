@@ -68,6 +68,32 @@ export default function AlertsScreen() {
     navigation.navigate('CreateOccurrence', { ocorrencia });
   };
 
+  const confirmarExclusao = (id: number) => {
+    Alert.alert(
+      'Confirmar exclusão',
+      'Tem certeza que deseja excluir esta ocorrência?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Excluir',
+          style: 'destructive',
+          onPress: () => excluirOcorrencia(id),
+        },
+      ]
+    );
+  };
+
+  const excluirOcorrencia = async (id: number) => {
+    try {
+      await api.delete(`/ocorrencias/${id}`);
+      setAlertas((prev) => prev.filter((o) => o.idOcorrencia !== id));
+      Alert.alert('Sucesso', 'Ocorrência excluída com sucesso!');
+    } catch (error) {
+      console.error('Erro ao excluir ocorrência:', error);
+      Alert.alert('Erro', 'Falha ao excluir ocorrência.');
+    }
+  };
+
   if (loading) {
     return (
       <SafeAreaView style={styles.safeArea}>
@@ -106,9 +132,15 @@ export default function AlertsScreen() {
               </Text>
               <Text style={styles.regiao}>{item.dsOcorrencia}</Text>
 
-              <TouchableOpacity onPress={() => handleEditar(item)}>
-                <Text style={styles.editButton}>✏️ Editar</Text>
-              </TouchableOpacity>
+              <View style={styles.buttonRow}>
+                <TouchableOpacity onPress={() => handleEditar(item)}>
+                  <Text style={styles.editButton}>✏️ Editar</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={() => confirmarExclusao(item.idOcorrencia)}>
+                  <Text style={styles.deleteButton}>🗑️ Excluir</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           )}
           showsVerticalScrollIndicator={false}
@@ -156,9 +188,17 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 14,
   },
-  editButton: {
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginTop: 10,
+  },
+  editButton: {
     color: colors.gold,
+    fontWeight: 'bold',
+  },
+  deleteButton: {
+    color: colors.riscoGrave,
     fontWeight: 'bold',
   },
 });
