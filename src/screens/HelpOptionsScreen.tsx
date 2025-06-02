@@ -1,157 +1,178 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   SafeAreaView,
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
+  FlatList,
+  ActivityIndicator,
   Alert,
+  TouchableOpacity,
 } from 'react-native';
-import { RouteProp, useRoute } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../types/navigation';
 import api from '../services/api';
 
-type HelpOptionsRouteProp = RouteProp<
-  { params: { cidade: string; problema: string } },
-  'params'
->;
+type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'CreateOccurrence'>;
 
-const tipoAjudaSubopcoes: Record<string, string[]> = {
-  DOAR_ITENS: ['ALIMENTOS', 'ROUPAS', 'HIGIENE', 'DOAR_DINHEIRO'],
-  AJUDAR_NO_LOCAL: ['PRIMEIROS_SOCORROS', 'SUPRIMENTOS', 'REMOCAO_ENTULHO'],
-};
-
-const enderecosPorCidade: Record<string, string> = {
-  Niterói: 'Av. Solidariedade, 123',
-  Osasco: 'Rua da Esperança, 456',
-  'Ouro Preto': 'Praça da União, 789',
-};
+interface Alerta {
+  idOcorrencia: number;
+  tipoOcorrencia: { dsTipoOcorrencia: string };
+  regiao: { nmRegiao: string };
+  nivelUrgencia: { dsNivelUrgencia: string; idNivelUrgencia: number };
+  dsOcorrencia: string;
+  statusOcorrencia: { idStatusOcorrencia: number };
+}
 
 const colors = {
   darkBlue: '#031C26',
+  cardBg: '#0b3043',
   offWhite: '#F2F2F0',
   gold: '#D9C359',
-  orange: '#F2811D',
-  grayLight: '#888',
-  cardBg: '#0b3043',
-  optionBg: '#14394d',
-  optionBorder: '#244b6b',
+  riscoLeve: '#28a745',
+  riscoModerado: '#ffc107',
+  riscoGrave: '#dc3545',
 };
 
-export default function HelpOptionsScreen() {
-  const route = useRoute<HelpOptionsRouteProp>();
-  const { cidade, problema } = route.params;
+export default function AlertsScreen() {
+  const navigation = useNavigation<NavigationProp>();
+  const [alertas, setAlertas] = useState<Alerta[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [tiposAjuda, setTiposAjuda] = useState<string[]>([]);
-  const [etapa, setEtapa] = useState(1);
-  const [opcaoSelecionada, setOpcaoSelecionada] = useState('');
-  const [subOpcao, setSubOpcao] = useState('');
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
 
-  useEffect(() => {
-    api
-      .get<string[]>('/tipos-ajuda/enums')
-      .then((res) => setTiposAjuda(res.data))
-      .catch(() => Alert.alert('Erro', 'Não foi possível carregar os tipos de ajuda.'));
-  }, []);
+      async function carregarAlertas() {
+        setLoading(true);
+        try {
+          const resposta = await api.get('/ocorrencias');
+          if (isActive) setAlertas(resposta.data);
+        } catch (error) {
+          console.error('Erro ao buscar alertas:', error);
+          Alert.alert('Erro', 'Não foi possível carregar os alertas.');
+        } finally {
+          setLoading(false);
+        }
+      }
 
-  const handlePrimeiraEscolha = (opcao: string) => {
-    setOpcaoSelecionada(opcao);
-    setEtapa(2);
+      carregarAlertas();
+
+      return () => {
+        isActive = false;
+      };
+    }, [])
+  );
+
+  const getRiscoColor = (descricao: string) => {
+    const risco = descricao.toLowerCase();
+    if (risco.includes('leve')) return colors.riscoLeve;
+    if (risco.includes('moderado')) return colors.riscoModerado;
+    if (risco.includes('grave')) return colors.riscoGrave;
+    return colors.offWhite;
   };
 
-  const handleSubOpcao = (sub: string) => {
-    setSubOpcao(sub);
-    setEtapa(3);
+  const handleEditar = (alerta: Alerta) => {
+    navigation.navigate('CreateOccurrence', {
+      ocorrencia: {
+        idOcorrencia: alerta.idOcorrencia,
+        tipoOcorrencia: {
+          dsTipoOcorrencia: alerta.tipoOcorrencia.dsTipoOcorrencia,
+          nmTipoOcorrencia: alerta.tipoOcorrencia.dsTipoOcorrencia, // mesmo valor, se só vier um
+        },
+        regiao: {
+          nmRegiao: alerta.regiao.nmRegiao,
+        },
+        nivelUrgencia: {
+          idNivelUrgencia: alerta.nivelUrgencia.idNivelUrgencia,
+        },
+        statusOcorrencia: {
+          idStatusOcorrencia: alerta.statusOcorrencia.idStatusOcorrencia,
+        },
+        dsOcorrencia: alerta.dsOcorrencia,
+      },
+    });
   };
 
-  const handleVoltar = () => {
-    if (etapa === 2) {
-      setEtapa(1);
-      setOpcaoSelecionada('');
-    } else if (etapa === 3) {
-      setEtapa(2);
-      setSubOpcao('');
+
+  const confirmarExclusao = (id: number) => {
+    Alert.alert(
+      'Confirmar exclusão',
+      'Tem certeza que deseja excluir esta ocorrência?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Excluir',
+          style: 'destructive',
+          onPress: () => excluirOcorrencia(id),
+        },
+      ]
+    );
+  };
+
+  const excluirOcorrencia = async (id: number) => {
+    try {
+      await api.delete(`/ocorrencias/${id}`);
+      setAlertas((prev) => prev.filter((o) => o.idOcorrencia !== id));
+      Alert.alert('Sucesso', 'Ocorrência excluída com sucesso!');
+    } catch (error) {
+      console.error('Erro ao excluir ocorrência:', error);
+      Alert.alert('Erro', 'Falha ao excluir ocorrência.');
     }
   };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.container}>
+          <ActivityIndicator size="large" color={colors.gold} />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        {etapa === 1 && (
-          <>
-            <Text style={styles.title}>Como você deseja ajudar?</Text>
-            <Text style={styles.subtitle}>
-              {cidade} — {problema}
-            </Text>
-
-            {tiposAjuda.map((opcao) => (
-              <TouchableOpacity
-                key={opcao}
-                style={styles.option}
-                onPress={() => handlePrimeiraEscolha(opcao)}
+        <Text style={styles.title}>Alertas Ativos</Text>
+        <FlatList
+          data={alertas}
+          keyExtractor={(item) => item.idOcorrencia.toString()}
+          renderItem={({ item }) => (
+            <View
+              style={[
+                styles.card,
+                {
+                  borderLeftColor: getRiscoColor(item.nivelUrgencia.dsNivelUrgencia),
+                },
+              ]}
+            >
+              <Text style={styles.tipo}>{item.tipoOcorrencia.dsTipoOcorrencia}</Text>
+              <Text style={styles.regiao}>{item.regiao.nmRegiao}</Text>
+              <Text
+                style={[
+                  styles.riscoText,
+                  { color: getRiscoColor(item.nivelUrgencia.dsNivelUrgencia) },
+                ]}
               >
-                <Text style={styles.optionText}>{opcao.replace(/_/g, ' ')}</Text>
-              </TouchableOpacity>
-            ))}
-          </>
-        )}
+                Risco: {item.nivelUrgencia.dsNivelUrgencia.toUpperCase()}
+              </Text>
+              <Text style={styles.regiao}>{item.dsOcorrencia}</Text>
 
-        {etapa === 2 && (
-          <>
-            <Text style={styles.title}>
-              Escolha uma forma de {opcaoSelecionada.replace(/_/g, ' ').toLowerCase()}
-            </Text>
+              <View style={styles.buttonRow}>
+                <TouchableOpacity onPress={() => handleEditar(item)}>
+                  <Text style={styles.editButton}>✏️ Editar</Text>
+                </TouchableOpacity>
 
-            {tipoAjudaSubopcoes[opcaoSelecionada]?.map((sub, idx) => (
-              <TouchableOpacity
-                key={idx}
-                style={styles.option}
-                onPress={() => handleSubOpcao(sub)}
-              >
-                <Text style={styles.optionText}>{sub.replace(/_/g, ' ')}</Text>
-              </TouchableOpacity>
-            ))}
-
-            <TouchableOpacity style={styles.backButton} onPress={handleVoltar}>
-              <Text style={styles.backText}>Voltar</Text>
-            </TouchableOpacity>
-          </>
-        )}
-
-        {etapa === 3 && (
-          <>
-            {subOpcao === 'DOAR_DINHEIRO' ? (
-              <>
-                <Text style={styles.title}>Doação via Pix</Text>
-                <View style={styles.card}>
-                  <Text style={styles.cardText}>Envie sua contribuição para:</Text>
-                  <Text style={[styles.cardText, { fontWeight: 'bold', fontSize: 18 }]}>
-                    ajuda@redepapagaio.org
-                  </Text>
-                </View>
-              </>
-            ) : (
-              <>
-                <Text style={styles.title}>Compareça ao local indicado</Text>
-                <Text style={styles.subtitle}>
-                  Para realizar a ação: <Text style={{ fontWeight: 'bold' }}>{subOpcao.replace(/_/g, ' ')}</Text>
-                </Text>
-
-                <View style={styles.card}>
-                  <Text style={styles.cardText}>Endereço:</Text>
-                  <Text style={styles.cardText}>
-                    {enderecosPorCidade[cidade] || 'Endereço não disponível'}
-                  </Text>
-                  <Text style={styles.cardText}>{cidade} - Centro</Text>
-                  <Text style={styles.cardText}>Atendimento: 08h às 18h</Text>
-                </View>
-              </>
-            )}
-
-            <TouchableOpacity style={styles.backButton} onPress={handleVoltar}>
-              <Text style={styles.backText}>Voltar</Text>
-            </TouchableOpacity>
-          </>
-        )}
+                <TouchableOpacity onPress={() => confirmarExclusao(item.idOcorrencia)}>
+                  <Text style={styles.deleteButton}>🗑️ Excluir</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+          showsVerticalScrollIndicator={false}
+        />
       </View>
     </SafeAreaView>
   );
@@ -165,51 +186,47 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    justifyContent: 'center',
   },
   title: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: 'bold',
     color: colors.gold,
     textAlign: 'center',
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: colors.offWhite,
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  option: {
-    backgroundColor: colors.optionBg,
-    padding: 15,
-    borderRadius: 8,
     marginBottom: 15,
-    borderColor: colors.optionBorder,
-    borderWidth: 1,
-  },
-  optionText: {
-    color: colors.offWhite,
-    fontSize: 16,
-    textAlign: 'center',
   },
   card: {
     backgroundColor: colors.cardBg,
-    padding: 20,
-    borderRadius: 10,
-    marginVertical: 20,
+    padding: 15,
+    marginBottom: 12,
+    borderRadius: 8,
+    borderLeftWidth: 8,
+    elevation: 3,
   },
-  cardText: {
+  tipo: {
+    fontSize: 18,
+    fontWeight: 'bold',
     color: colors.offWhite,
-    fontSize: 16,
-    marginBottom: 5,
   },
-  backButton: {
-    alignSelf: 'center',
-    padding: 10,
-  },
-  backText: {
-    color: colors.grayLight,
+  regiao: {
     fontSize: 14,
+    color: colors.offWhite,
+    marginBottom: 6,
+  },
+  riscoText: {
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  editButton: {
+    color: colors.gold,
+    fontWeight: 'bold',
+  },
+  deleteButton: {
+    color: colors.riscoGrave,
+    fontWeight: 'bold',
   },
 });

@@ -18,12 +18,19 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'CreateOccur
 
 interface Alerta {
   idOcorrencia: number;
-  tipoOcorrencia: { dsTipoOcorrencia: string };
+  tipoOcorrencia: {
+    dsTipoOcorrencia: string;
+    nmTipoOcorrencia: string;
+  };
   regiao: { nmRegiao: string };
-  nivelUrgencia: { dsNivelUrgencia: string; idNivelUrgencia: number };
+  nivelUrgencia: {
+    dsNivelUrgencia: string;
+    idNivelUrgencia: number;
+  };
   dsOcorrencia: string;
   statusOcorrencia: { idStatusOcorrencia: number };
 }
+
 
 const colors = {
   darkBlue: '#031C26',
@@ -64,8 +71,31 @@ export default function AlertsScreen() {
     return colors.offWhite;
   };
 
+  const mapAlertaToOcorrencia = (
+    alerta: Alerta
+  ): RootStackParamList['CreateOccurrence']['ocorrencia'] => ({
+    idOcorrencia: alerta.idOcorrencia,
+    tipoOcorrencia: {
+      dsTipoOcorrencia: alerta.tipoOcorrencia.dsTipoOcorrencia,
+      nmTipoOcorrencia: alerta.tipoOcorrencia.nmTipoOcorrencia,
+    },
+    regiao: {
+      nmRegiao: alerta.regiao.nmRegiao,
+    },
+    nivelUrgencia: {
+      idNivelUrgencia: alerta.nivelUrgencia.idNivelUrgencia,
+    },
+    statusOcorrencia: {
+      idStatusOcorrencia: alerta.statusOcorrencia.idStatusOcorrencia,
+    },
+    dsOcorrencia: alerta.dsOcorrencia,
+  });
+
+
   const handleEditar = (ocorrencia: Alerta) => {
-    navigation.navigate('CreateOccurrence', { ocorrencia });
+    navigation.navigate('CreateOccurrence', {
+      ocorrencia: mapAlertaToOcorrencia(ocorrencia),
+    });
   };
 
   const confirmarExclusao = (id: number) => {
@@ -123,10 +153,7 @@ export default function AlertsScreen() {
               <Text style={styles.tipo}>{item.tipoOcorrencia.dsTipoOcorrencia}</Text>
               <Text style={styles.regiao}>{item.regiao.nmRegiao}</Text>
               <Text
-                style={[
-                  styles.riscoText,
-                  { color: getRiscoColor(item.nivelUrgencia.dsNivelUrgencia) },
-                ]}
+                style={[styles.riscoText, { color: getRiscoColor(item.nivelUrgencia.dsNivelUrgencia) }]}
               >
                 Risco: {item.nivelUrgencia.dsNivelUrgencia.toUpperCase()}
               </Text>
