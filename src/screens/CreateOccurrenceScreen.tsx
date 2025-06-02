@@ -15,57 +15,84 @@ import api from '../services/api';
 
 type CreateOccurrenceRouteProp = RouteProp<RootStackParamList, 'CreateOccurrence'>;
 
+interface TipoOcorrencia {
+  idTipoOcorrencia: number;
+  nmTipoOcorrencia: string;
+}
+
+interface Regiao {
+  idRegiao: number;
+  nmRegiao: string;
+}
+
+interface NivelUrgencia {
+  idNivelUrgencia: number;
+  nmNivel: string;
+}
+
 export default function CreateOccurrenceScreen() {
   const navigation = useNavigation();
   const route = useRoute<CreateOccurrenceRouteProp>();
-
   const isEditando = !!route.params?.ocorrencia;
 
   const [descricao, setDescricao] = useState('');
-  const [regiao, setRegiao] = useState('');
-  const [tipos, setTipos] = useState<string[]>([]);
-  const [tipoSelecionado, setTipoSelecionado] = useState<string | null>(null);
+  const [tipos, setTipos] = useState<TipoOcorrencia[]>([]);
+  const [tipoSelecionado, setTipoSelecionado] = useState<number | null>(null);
+
+  const [regioes, setRegioes] = useState<Regiao[]>([]);
+  const [regiaoSelecionada, setRegiaoSelecionada] = useState<number | null>(null);
+
+  const [niveis, setNiveis] = useState<NivelUrgencia[]>([]);
+  const [nivelSelecionado, setNivelSelecionado] = useState<number | null>(null);
 
   useEffect(() => {
-    // Busca os valores do enum
-    api.get<string[]>('/tipos-ocorrencia/enums')
-      .then((res) => setTipos(res.data))
-      .catch(() => Alert.alert('Erro', 'Não foi possível carregar os tipos de ocorrência.'));
+    async function carregarDados() {
+      try {
+        const [resTipos, resRegioes, resNiveis] = await Promise.all([
+          api.get<TipoOcorrencia[]>('/tipos-ocorrencias/todos'),
+          api.get<Regiao[]>('/regioes/todas'),
+          api.get<NivelUrgencia[]>('/niveis-urgencia/todos'),
+        ]);
+        setTipos(resTipos.data);
+        setRegioes(resRegioes.data);
+        setNiveis(resNiveis.data);
+      } catch (error) {
+        Alert.alert('Erro', 'Não foi possível carregar os dados.');
+      }
 
-    const ocorrencia = route.params?.ocorrencia;
-    if (ocorrencia) {
-      setDescricao(ocorrencia.dsOcorrencia);
-      setRegiao(ocorrencia.regiao.nmRegiao);
-      setTipoSelecionado(
-        ocorrencia.tipoOcorrencia.nmTipoOcorrencia ?? ocorrencia.tipoOcorrencia.dsTipoOcorrencia
-      );
+      const ocorrencia = route.params?.ocorrencia;
+      if (ocorrencia) {
+        setDescricao(ocorrencia.dsOcorrencia);
+        setTipoSelecionado(ocorrencia.tipoOcorrencia?.idTipoOcorrencia || null);
+        setRegiaoSelecionada(ocorrencia.regiao?.idRegiao || null);
+        setNivelSelecionado(ocorrencia.nivelUrgencia?.idNivelUrgencia || null);
+      }
     }
+
+    carregarDados();
   }, [route.params]);
 
   async function salvarOcorrencia() {
-    if (!tipoSelecionado || !regiao.trim() || !descricao.trim()) {
+    if (!tipoSelecionado || !regiaoSelecionada || !nivelSelecionado || !descricao.trim()) {
       Alert.alert('Campos obrigatórios', 'Preencha todos os campos.');
       return;
     }
 
     const payload = {
-      tipoOcorrencia: {
-        nmTipoOcorrencia: tipoSelecionado!,
-        dsTipoOcorrencia: tipoSelecionado!.replace(/_/g, ' '),
-      },
-      regiao: { nmRegiao: regiao },
+      tipoOcorrencia: { idTipoOcorrencia: tipoSelecionado },
+      regiao: { idRegiao: regiaoSelecionada },
+      nivelUrgencia: { idNivelUrgencia: nivelSelecionado },
+      statusOcorrencia: { idStatusOcorrencia: 1 }, // Status padrão: "pendente"
       dsOcorrencia: descricao,
-      statusOcorrencia: { idStatusOcorrencia: 1 },
-      nivelUrgencia: { idNivelUrgencia: 2 },
     };
 
     try {
       const ocorrencia = route.params?.ocorrencia;
       if (isEditando && ocorrencia) {
-        await api.put(`/ocorrencias/${ocorrencia.idOcorrencia}`, payload);
+        await api.put(`/ocorrencias/atualizar/${ocorrencia.idOcorrencia}`, payload);
         Alert.alert('Sucesso', 'Ocorrência atualizada com sucesso!');
       } else {
-        await api.post('/ocorrencias', payload);
+        await api.post('/ocorrencias/inserir', payload);
         Alert.alert('Sucesso', 'Ocorrência cadastrada com sucesso!');
       }
 
@@ -92,20 +119,48 @@ export default function CreateOccurrenceScreen() {
             <Picker.Item label="Selecione o tipo" value={null} />
             {tipos.map((tipo) => (
               <Picker.Item
-                key={tipo}
-                label={tipo.replace(/_/g, ' ')}
-                value={tipo}
+                key={tipo.idTipoOcorrencia}
+                label={tipo.nmTipoOcorrencia.replace(/_/g, ' ')}
+                value={tipo.idTipoOcorrencia}
               />
             ))}
           </Picker>
         </View>
 
-        <TextInput
-          placeholder="Região"
-          style={styles.input}
-          value={regiao}
-          onChangeText={setRegiao}
-        />
+        <Text style={styles.label}>Região</Text>
+        <View style={styles.pickerWrapper}>
+          <Picker
+            selectedValue={regiaoSelecionada}
+            onValueChange={(itemValue) => setRegiaoSelecionada(itemValue)}
+          >
+            <Picker.Item label="Selecione a região" value={null} />
+            {regioes.map((regiao) => (
+              <Picker.Item
+                key={regiao.idRegiao}
+                label={regiao.nmRegiao}
+                value={regiao.idRegiao}
+              />
+            ))}
+          </Picker>
+        </View>
+
+        <Text style={styles.label}>Nível de Urgência</Text>
+        <View style={styles.pickerWrapper}>
+          <Picker
+            selectedValue={nivelSelecionado}
+            onValueChange={(itemValue) => setNivelSelecionado(itemValue)}
+          >
+            <Picker.Item label="Selecione o nível" value={null} />
+            {niveis.map((nivel) => (
+              <Picker.Item
+                key={nivel.idNivelUrgencia}
+                label={nivel.nmNivel.charAt(0).toUpperCase() + nivel.nmNivel.slice(1).toLowerCase()}
+                value={nivel.idNivelUrgencia}
+              />
+            ))}
+          </Picker>
+        </View>
+
         <TextInput
           placeholder="Descrição"
           style={[styles.input, { height: 80 }]}

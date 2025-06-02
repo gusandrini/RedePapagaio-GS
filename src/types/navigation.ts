@@ -16,12 +16,20 @@ export type RootStackParamList = {
     ocorrencia?: {
       idOcorrencia: number;
       tipoOcorrencia: {
-        dsTipoOcorrencia: string;
+        idTipoOcorrencia: number;
         nmTipoOcorrencia: string;
       };
-      regiao: { nmRegiao: string };
-      nivelUrgencia: { idNivelUrgencia: number };
-      statusOcorrencia: { idStatusOcorrencia: number };
+      regiao: {
+        idRegiao: number;
+        nmRegiao: string;
+      };
+      nivelUrgencia: {
+        idNivelUrgencia: number;
+        nmNivel: string;
+      };
+      statusOcorrencia: {
+        idStatusOcorrencia: number;
+      };
       dsOcorrencia: string;
     };
   };
