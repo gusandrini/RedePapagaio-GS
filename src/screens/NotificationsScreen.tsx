@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   View,
@@ -6,9 +6,12 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import api from '../services/api'; // Ajuste esse caminho conforme sua estrutura
 
 interface Notificacao {
   id: string;
@@ -23,12 +26,6 @@ type RootStackParamList = {
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'HelpOptions'>;
 
-const mockNotificacoes: Notificacao[] = [
-  { id: '1', cidade: 'Osasco', estado: 'SP', problema: 'Enchente' },
-  { id: '2', cidade: 'Niterói', estado: 'RJ', problema: 'Calor extremo' },
-  { id: '3', cidade: 'Ouro Preto', estado: 'MG', problema: 'Deslizamento' },
-];
-
 const colors = {
   darkBlue: '#031C26',
   offWhite: '#F2F2F0',
@@ -39,36 +36,59 @@ const colors = {
 
 export default function NotificationsScreen() {
   const navigation = useNavigation<NavigationProp>();
+  const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
+  const [carregando, setCarregando] = useState(true);
+
+  useEffect(() => {
+    const carregarNotificacoes = async () => {
+      try {
+        const response = await api.get<Notificacao[]>('/ocorrencias');
+        setNotificacoes(response.data);
+      } catch (error) {
+        Alert.alert('Erro', 'Não foi possível carregar as notificações.');
+      } finally {
+        setCarregando(false);
+      }
+    };
+
+    carregarNotificacoes();
+  }, []);
+
+  const renderItem = ({ item }: { item: Notificacao }) => (
+    <View style={styles.card}>
+      <Text style={styles.cardText}>
+        {item.cidade} ({item.estado}): {item.problema}
+      </Text>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() =>
+          navigation.navigate('HelpOptions', {
+            cidade: item.cidade,
+            problema: item.problema,
+          })
+        }
+      >
+        <Text style={styles.buttonText}>Ajudar</Text>
+      </TouchableOpacity>
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <Text style={styles.title}>Pedidos por Cidade</Text>
 
-        <FlatList
-          data={mockNotificacoes}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <View style={styles.card}>
-              <Text style={styles.cardText}>
-                {item.cidade} ({item.estado}): {item.problema}
-              </Text>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() =>
-                  navigation.navigate('HelpOptions', {
-                    cidade: item.cidade,
-                    problema: item.problema,
-                  })
-                }
-              >
-                <Text style={styles.buttonText}>Ajudar</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 20 }}
-        />
+        {carregando ? (
+          <ActivityIndicator size="large" color={colors.buttonBg} />
+        ) : (
+          <FlatList
+            data={notificacoes}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={renderItem}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 20 }}
+          />
+        )}
       </View>
     </SafeAreaView>
   );

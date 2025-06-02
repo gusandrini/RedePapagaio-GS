@@ -11,7 +11,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
-import api from '../services/api'; // agora realmente usando
+import api from '../services/api';
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
 
@@ -20,14 +20,13 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [nome, setNome] = useState('');
-  const [cpf, setCpf] = useState('');
   const [loading, setLoading] = useState(false);
 
   const navigation = useNavigation<LoginScreenNavigationProp>();
 
   const handleAuth = async () => {
-    if (!email || !password || (!isLogin && (!nome || !cpf))) {
-      return Alert.alert('Erro', 'Preencha todos os campos.');
+    if (!email.trim() || !password.trim() || (!isLogin && !nome.trim())) {
+      return Alert.alert('Erro', 'Preencha todos os campos obrigatórios.');
     }
 
     setLoading(true);
@@ -35,18 +34,18 @@ export default function LoginScreen() {
     try {
       if (isLogin) {
         const response = await api.post('/auth/login', {
-          email,
-          senha: password,
+          nmEmail: email,
+          nmSenha: password,
         });
 
-        // Aqui você pode salvar o token com AsyncStorage, se necessário
         Alert.alert('Sucesso', 'Login realizado com sucesso!');
+        // await AsyncStorage.setItem('token', response.data.token); (opcional)
+
       } else {
         await api.post('/auth/register', {
-          nome,
-          cpf,
-          email,
-          senha: password,
+          nmUsuario: nome,
+          nmEmail: email,
+          nmSenha: password,
         });
 
         Alert.alert('Sucesso', 'Cadastro realizado com sucesso!');
@@ -57,7 +56,7 @@ export default function LoginScreen() {
       console.error('Erro na autenticação:', error);
       Alert.alert(
         'Erro',
-        error?.response?.data?.message || 'Verifique seus dados e tente novamente.'
+        error?.response?.data?.message || 'Falha na autenticação. Verifique seus dados.'
       );
     } finally {
       setLoading(false);
@@ -69,22 +68,13 @@ export default function LoginScreen() {
       <Text style={styles.title}>{isLogin ? 'Login' : 'Cadastro'}</Text>
 
       {!isLogin && (
-        <>
-          <TextInput
-            style={styles.input}
-            placeholder="Nome"
-            placeholderTextColor={colors.offWhite}
-            value={nome}
-            onChangeText={setNome}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="CPF"
-            placeholderTextColor={colors.offWhite}
-            value={cpf}
-            onChangeText={setCpf}
-          />
-        </>
+        <TextInput
+          style={styles.input}
+          placeholder="Nome"
+          placeholderTextColor={colors.offWhite}
+          value={nome}
+          onChangeText={setNome}
+        />
       )}
 
       <TextInput
@@ -99,10 +89,10 @@ export default function LoginScreen() {
       <TextInput
         style={styles.input}
         placeholder="Senha"
+        placeholderTextColor={colors.offWhite}
         secureTextEntry
         value={password}
         onChangeText={setPassword}
-        placeholderTextColor={colors.offWhite}
       />
 
       {loading ? (
