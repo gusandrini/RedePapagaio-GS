@@ -7,11 +7,15 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { CompositeNavigationProp, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../types/navigation';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { RootStackParamList, TabParamList } from '../types/navigation';
 
-type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+type NavigationProp = CompositeNavigationProp<
+  BottomTabNavigationProp<TabParamList>,
+  NativeStackNavigationProp<RootStackParamList>
+>;
 
 const colors = {
   darkBlue: '#031C26',
@@ -43,33 +47,36 @@ export default function HomeScreen() {
                 problema: 'Desabamento',
               })
             }
-            accessibilityLabel="Solicitar ou oferecer ajuda"
           >
-            <Text style={styles.buttonText}>Preciso de Ajuda</Text>
+            <Text style={styles.buttonText}>🆘 Preciso de Ajuda</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.button}
             onPress={() => navigation.navigate('Mapa')}
-            accessibilityLabel="Ver ONGs no mapa"
           >
-            <Text style={styles.buttonText}>Quero Ajudar</Text>
+            <Text style={styles.buttonText}>🤝 Quero Ajudar (Ver ONGs)</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.button}
             onPress={() => navigation.navigate('Alertas')}
-            accessibilityLabel="Ver alertas recentes"
           >
-            <Text style={styles.buttonText}>Ver Alertas</Text>
+            <Text style={styles.buttonText}>⚠️ Alertas Atuais</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate('WhatsApp')}
+          >
+            <Text style={styles.buttonText}>📱 Comunidade (WhatsApp)</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.button, styles.primaryButton]}
             onPress={() => navigation.navigate('Notifications')}
-            accessibilityLabel="Ver pedidos por cidade"
           >
-            <Text style={styles.buttonText}>Pedidos por Cidade</Text>
+            <Text style={styles.buttonText}>📍 Pedidos por Cidade</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

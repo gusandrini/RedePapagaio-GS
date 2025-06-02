@@ -5,9 +5,9 @@ import { TabParamList } from '../types/navigation';
 
 import HomeScreen from '../screens/HomeScreen';
 import AlertsScreen from '../screens/AlertsScreen';
-import NotificationsScreen from '../screens/NotificationsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import AboutScreen from '../screens/AboutScreen';
+import WhatsAppScreen from '../screens/WhatsAppScreen'; 
 
 const Tab = createBottomTabNavigator<TabParamList>();
 
@@ -35,8 +35,8 @@ export default function TabNavigator() {
             case 'Alertas':
               iconName = 'warning';
               break;
-            case 'Notificacoes':
-              iconName = 'notifications';
+            case 'WhatsApp':
+              iconName = 'chatbubbles';
               break;
             case 'Perfil':
               iconName = 'person';
@@ -52,7 +52,7 @@ export default function TabNavigator() {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Alertas" component={AlertsScreen} />
-      <Tab.Screen name="Notificacoes" component={NotificationsScreen} />
+      <Tab.Screen name="WhatsApp" component={WhatsAppScreen} />
       <Tab.Screen name="Perfil" component={ProfileScreen} />
       <Tab.Screen name="Sobre" component={AboutScreen} />
     </Tab.Navigator>

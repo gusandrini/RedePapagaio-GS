@@ -1,17 +1,13 @@
+// navigation.ts (corrigido e unificado)
 export type RootStackParamList = {
   Login: undefined;
   Home: undefined;
+
   HelpOptions: { cidade: string; problema: string };
   OngDetail: { id: string; nome: string; cidade: string };
   ChatIA: undefined;
-  // Feedback: undefined; // desativado no momento
   Mapa: undefined;
-  About: undefined;
-  Alertas: undefined;
   Notifications: undefined;
-  Profile: undefined;
-
-  // Rota para criar ou editar ocorrência
   CreateOccurrence: {
     ocorrencia?: {
       idOcorrencia: number;
@@ -33,12 +29,13 @@ export type RootStackParamList = {
       dsOcorrencia: string;
     };
   };
+  WhatsApp: undefined;
 };
 
 export type TabParamList = {
   Home: undefined;
   Alertas: undefined;
-  Notificacoes: undefined;
+  WhatsApp: undefined;
   Perfil: undefined;
   Sobre: undefined;
 };
