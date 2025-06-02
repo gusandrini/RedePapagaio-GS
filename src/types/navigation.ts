@@ -4,10 +4,12 @@ export type RootStackParamList = {
   HelpOptions: { cidade: string; problema: string };
   OngDetail: { id: string; nome: string; cidade: string };
   ChatIA: undefined;
-  Feedback: undefined;
+  // Feedback: undefined; // desativado no momento
   Mapa: undefined;
   About: undefined;
   Alertas: undefined;
+  Notifications: undefined;
+  Profile: undefined;
 
   // Rota para criar ou editar ocorrência
   CreateOccurrence: {

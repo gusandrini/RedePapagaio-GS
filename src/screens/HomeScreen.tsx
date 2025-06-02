@@ -1,5 +1,12 @@
 import React from 'react';
-import { SafeAreaView, ScrollView, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import {
+  SafeAreaView,
+  ScrollView,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
@@ -27,44 +34,44 @@ export default function HomeScreen() {
         <Text style={styles.title}>Bem-vindo(a) à RedePapagaio 🦜</Text>
         <Text style={styles.subtitle}>Conectando ajuda em situações extremas</Text>
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate('ChatIA')}
-          accessibilityLabel="Ir para chat de emergência com IA"
-        >
-          <Text style={styles.buttonText}>Chat de Emergência com IA</Text>
-        </TouchableOpacity>
+        <View style={styles.menuContainer}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() =>
+              navigation.navigate('HelpOptions', {
+                cidade: 'São Paulo',
+                problema: 'Desabamento',
+              })
+            }
+            accessibilityLabel="Solicitar ou oferecer ajuda"
+          >
+            <Text style={styles.buttonText}>Preciso de Ajuda</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() =>
-            navigation.navigate('OngDetail', {
-              id: '0',
-              nome: 'ONG Exemplo',
-              cidade: 'São Paulo',
-            })
-          }
-          accessibilityLabel="Visualizar ONG exemplo"
-        >
-          <Text style={styles.buttonText}>Visualizar ONG (exemplo)</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate('Mapa')}
+            accessibilityLabel="Ver ONGs no mapa"
+          >
+            <Text style={styles.buttonText}>Quero Ajudar</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate('Mapa')}
-          accessibilityLabel="Ver ONGs no mapa"
-        >
-          <Text style={styles.buttonText}>Ver ONGs no mapa</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate('Alertas')}
+            accessibilityLabel="Ver alertas recentes"
+          >
+            <Text style={styles.buttonText}>Ver Alertas</Text>
+          </TouchableOpacity>
 
-        {/* Botão principal destacado */}
-        <TouchableOpacity
-          style={[styles.button, styles.primaryButton]}
-          onPress={() => navigation.navigate('Alertas')}
-          accessibilityLabel="Selecionar cidade para ajudar agora"
-        >
-          <Text style={styles.buttonText}>Quero Ajudar Agora</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.button, styles.primaryButton]}
+            onPress={() => navigation.navigate('Notifications')}
+            accessibilityLabel="Ver pedidos por cidade"
+          >
+            <Text style={styles.buttonText}>Pedidos por Cidade</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -95,14 +102,15 @@ const styles = StyleSheet.create({
     marginBottom: 40,
     fontWeight: '600',
   },
+  menuContainer: {
+    width: '100%',
+    maxWidth: 400,
+  },
   button: {
     backgroundColor: colors.orange,
     paddingVertical: 16,
-    paddingHorizontal: 30,
     borderRadius: 25,
     marginVertical: 10,
-    width: '100%',
-    maxWidth: 400,
     shadowColor: colors.darkBlue,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,

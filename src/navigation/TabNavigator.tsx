@@ -2,6 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { TabParamList } from '../types/navigation';
+
 import HomeScreen from '../screens/HomeScreen';
 import AlertsScreen from '../screens/AlertsScreen';
 import NotificationsScreen from '../screens/NotificationsScreen';
@@ -25,28 +26,28 @@ export default function TabNavigator() {
           height: 60,
         },
         tabBarIcon: ({ color, size }) => {
-  let iconName: keyof typeof Ionicons.glyphMap = 'home'; // valor padrão
+          let iconName: keyof typeof Ionicons.glyphMap = 'home';
 
-  switch (route.name) {
-    case 'Home':
-      iconName = 'home';
-      break;
-    case 'Alertas':
-      iconName = 'warning';
-      break;
-    case 'Notificacoes':
-      iconName = 'notifications';
-      break;
-    case 'Perfil':
-      iconName = 'person';
-      break;
-    case 'Sobre':
-      iconName = 'information-circle';
-      break;
-  }
+          switch (route.name) {
+            case 'Home':
+              iconName = 'home';
+              break;
+            case 'Alertas':
+              iconName = 'warning';
+              break;
+            case 'Notificacoes':
+              iconName = 'notifications';
+              break;
+            case 'Perfil':
+              iconName = 'person';
+              break;
+            case 'Sobre':
+              iconName = 'information-circle';
+              break;
+          }
 
-  return <Ionicons name={iconName} size={size} color={color} />;
-},
+          return <Ionicons name={iconName} size={size} color={color} />;
+        },
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
