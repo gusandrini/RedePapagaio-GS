@@ -9,16 +9,15 @@ import {
   Alert,
   TouchableOpacity,
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../services/api';
 
 interface Usuario {
-  id: number;
-  nome: string;
-  tipo: 'Voluntário' | 'Pessoa Afetada' | 'Instituição';
-  cpf: string;
+  idUsuario: number;
+  nmUsuario: string;
+  nmEmail: string;
+  dtCadastro: string;
 }
 
 const colors = {
@@ -35,7 +34,6 @@ export default function ProfileScreen() {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [editando, setEditando] = useState(false);
   const [novoNome, setNovoNome] = useState('');
-  const [novoTipo, setNovoTipo] = useState<Usuario['tipo']>('Voluntário');
 
   useEffect(() => {
     async function carregarPerfil() {
@@ -45,8 +43,7 @@ export default function ProfileScreen() {
 
         const { data } = await api.get(`/usuarios/${id}`);
         setUsuario(data);
-        setNovoNome(data.nome);
-        setNovoTipo(data.tipo);
+        setNovoNome(data.nmUsuario);
       } catch (error) {
         Alert.alert('Erro', 'Não foi possível carregar os dados do usuário.');
         console.error(error);
@@ -63,13 +60,12 @@ export default function ProfileScreen() {
     }
 
     try {
-      await api.put(`/usuarios/${usuario.id}`, {
+      await api.put(`/usuarios/atualizar/${usuario.idUsuario}`, {
         ...usuario,
-        nome: novoNome,
-        tipo: novoTipo,
+        nmUsuario: novoNome,
       });
 
-      setUsuario({ ...usuario, nome: novoNome, tipo: novoTipo });
+      setUsuario({ ...usuario, nmUsuario: novoNome });
       setEditando(false);
       Alert.alert('Perfil atualizado com sucesso!');
     } catch (error) {
@@ -82,6 +78,33 @@ export default function ProfileScreen() {
     await AsyncStorage.removeItem('usuarioId');
     Alert.alert('Logout', 'Você saiu da conta.');
     navigation.navigate('Login' as never);
+  };
+
+  const excluirConta = async () => {
+    if (!usuario) return;
+
+    Alert.alert(
+      'Confirmar exclusão',
+      'Tem certeza que deseja excluir sua conta? Esta ação é irreversível.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Excluir',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await api.delete(`/usuarios/remover/${usuario.idUsuario}`);
+              await AsyncStorage.removeItem('usuarioId');
+              Alert.alert('Conta excluída com sucesso.');
+              navigation.navigate('Login' as never);
+            } catch (error) {
+              Alert.alert('Erro', 'Não foi possível excluir a conta.');
+              console.error(error);
+            }
+          },
+        },
+      ]
+    );
   };
 
   if (!usuario) {
@@ -110,33 +133,18 @@ export default function ProfileScreen() {
               placeholderTextColor={colors.grayLight}
             />
           ) : (
-            <Text style={styles.value}>{usuario.nome}</Text>
+            <Text style={styles.value}>{usuario.nmUsuario}</Text>
           )}
         </View>
 
         <View style={styles.infoBox}>
-          <Text style={styles.label}>Tipo:</Text>
-          {editando ? (
-            <View style={styles.pickerWrapper}>
-              <Picker
-                selectedValue={novoTipo}
-                onValueChange={(value) => setNovoTipo(value)}
-                style={styles.picker}
-                dropdownIconColor={colors.gold}
-              >
-                <Picker.Item label="Voluntário" value="Voluntário" />
-                <Picker.Item label="Pessoa Afetada" value="Pessoa Afetada" />
-                <Picker.Item label="Instituição" value="Instituição" />
-              </Picker>
-            </View>
-          ) : (
-            <Text style={styles.value}>{usuario.tipo}</Text>
-          )}
+          <Text style={styles.label}>Email:</Text>
+          <Text style={styles.value}>{usuario.nmEmail}</Text>
         </View>
 
         <View style={styles.infoBox}>
-          <Text style={styles.label}>CPF:</Text>
-          <Text style={styles.value}>{usuario.cpf}</Text>
+          <Text style={styles.label}>Cadastro:</Text>
+          <Text style={styles.value}>{usuario.dtCadastro}</Text>
         </View>
 
         <View style={styles.buttonContainer}>
@@ -162,6 +170,9 @@ export default function ProfileScreen() {
               </TouchableOpacity>
               <TouchableOpacity style={[styles.button, styles.logoutButton]} onPress={handleLogout}>
                 <Text style={styles.buttonText}>Sair</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.button, styles.deleteButton]} onPress={excluirConta}>
+                <Text style={styles.buttonText}>Excluir conta</Text>
               </TouchableOpacity>
             </>
           )}
@@ -199,18 +210,6 @@ const styles = StyleSheet.create({
     color: colors.offWhite,
     fontSize: 16,
   },
-  pickerWrapper: {
-    borderWidth: 1,
-    borderColor: colors.gold,
-    borderRadius: 8,
-    marginTop: 4,
-    overflow: 'hidden',
-    backgroundColor: '#14394d',
-  },
-  picker: {
-    color: colors.offWhite,
-    height: 44,
-  },
   buttonContainer: { marginTop: 30 },
   button: {
     paddingVertical: 14,
@@ -223,4 +222,5 @@ const styles = StyleSheet.create({
   saveButton: { backgroundColor: '#28a745' },
   cancelButton: { backgroundColor: colors.red },
   logoutButton: { backgroundColor: colors.red },
+  deleteButton: { backgroundColor: '#8B0000' },
 });

@@ -33,25 +33,35 @@ export default function LoginScreen() {
 
     try {
       if (isLogin) {
-        const response = await api.post('/auth/login', {
-          nmEmail: email,
-          nmSenha: password,
-        });
+        const response = await api.get('/usuarios/todos');
+        const usuarios = response.data;
 
-        Alert.alert('Sucesso', 'Login realizado com sucesso!');
-        // await AsyncStorage.setItem('token', response.data.token); (opcional)
+        // Comparação com .toLowerCase() para evitar erro com letras maiúsculas
+        const usuarioEncontrado = usuarios.find(
+          (u: any) =>
+            u.nmEmail?.toLowerCase() === email.toLowerCase() &&
+            u.nmSenha === password
+        );
+
+        if (usuarioEncontrado) {
+          Alert.alert('Sucesso', 'Login realizado com sucesso!');
+          navigation.navigate('Home');
+        } else {
+          Alert.alert('Erro', 'Email ou senha inválidos');
+        }
 
       } else {
-        await api.post('/auth/register', {
+        await api.post('/usuarios/inserir', {
           nmUsuario: nome,
           nmEmail: email,
           nmSenha: password,
+          dtCadastro: new Date().toISOString().split('T')[0], // yyyy-MM-dd
         });
 
         Alert.alert('Sucesso', 'Cadastro realizado com sucesso!');
+        navigation.navigate('Home');
       }
 
-      navigation.navigate('Home');
     } catch (error: any) {
       console.error('Erro na autenticação:', error);
       Alert.alert(
@@ -86,6 +96,7 @@ export default function LoginScreen() {
         autoCapitalize="none"
         keyboardType="email-address"
       />
+
       <TextInput
         style={styles.input}
         placeholder="Senha"
