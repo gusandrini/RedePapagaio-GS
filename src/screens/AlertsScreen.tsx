@@ -7,15 +7,22 @@ import {
   FlatList,
   ActivityIndicator,
   Alert,
+  TouchableOpacity,
 } from 'react-native';
 import api from '../services/api';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../types/navigation';
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'CreateOccurrence'>;
 
 interface Alerta {
   idOcorrencia: number;
   tipoOcorrencia: { dsTipoOcorrencia: string };
   regiao: { nmRegiao: string };
-  nivelUrgencia: { dsNivelUrgencia: string };
+  nivelUrgencia: { dsNivelUrgencia: string; idNivelUrgencia: number };
   dsOcorrencia: string;
+  statusOcorrencia: { idStatusOcorrencia: number };
 }
 
 const colors = {
@@ -29,6 +36,7 @@ const colors = {
 };
 
 export default function AlertsScreen() {
+  const navigation = useNavigation<NavigationProp>();
   const [alertas, setAlertas] = useState<Alerta[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -54,6 +62,10 @@ export default function AlertsScreen() {
     if (risco.includes('moderado')) return colors.riscoModerado;
     if (risco.includes('grave')) return colors.riscoGrave;
     return colors.offWhite;
+  };
+
+  const handleEditar = (ocorrencia: Alerta) => {
+    navigation.navigate('CreateOccurrence', { ocorrencia });
   };
 
   if (loading) {
@@ -93,6 +105,10 @@ export default function AlertsScreen() {
                 Risco: {item.nivelUrgencia.dsNivelUrgencia.toUpperCase()}
               </Text>
               <Text style={styles.regiao}>{item.dsOcorrencia}</Text>
+
+              <TouchableOpacity onPress={() => handleEditar(item)}>
+                <Text style={styles.editButton}>✏️ Editar</Text>
+              </TouchableOpacity>
             </View>
           )}
           showsVerticalScrollIndicator={false}
@@ -139,5 +155,10 @@ const styles = StyleSheet.create({
   riscoText: {
     fontWeight: 'bold',
     fontSize: 14,
+  },
+  editButton: {
+    marginTop: 10,
+    color: colors.gold,
+    fontWeight: 'bold',
   },
 });

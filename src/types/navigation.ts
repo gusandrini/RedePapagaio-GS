@@ -1,5 +1,3 @@
-// src/types/navigation.ts
-
 export type RootStackParamList = {
   Login: undefined;
   Main: undefined;
@@ -7,8 +5,20 @@ export type RootStackParamList = {
   OngDetail: { id: string; nome: string; cidade: string };
   ChatIA: undefined;
   Feedback: undefined;
-  Mapa: undefined; 
+  Mapa: undefined;
   About: undefined;
+
+  // NOVO: rota para criar ou editar ocorrência
+  CreateOccurrence: {
+    ocorrencia?: {
+      idOcorrencia: number;
+      tipoOcorrencia: { dsTipoOcorrencia: string };
+      regiao: { nmRegiao: string };
+      nivelUrgencia: { idNivelUrgencia: number };
+      statusOcorrencia: { idStatusOcorrencia: number };
+      dsOcorrencia: string;
+    };
+  };
 };
 
 export type TabParamList = {
