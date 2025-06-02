@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -6,27 +6,20 @@ import {
   Text,
   TextInput,
   StyleSheet,
-  Button,
   Alert,
   TouchableOpacity,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import api from '../services/api';
 
 interface Usuario {
+  id: number;
   nome: string;
   tipo: 'Voluntário' | 'Pessoa Afetada' | 'Instituição';
   cpf: string;
-  reputacao: number;
 }
-
-const mockUsuario: Usuario = {
-  nome: 'João da Silva',
-  tipo: 'Voluntário',
-  cpf: '123.456.789-00',
-  reputacao: 4.5,
-};
 
 const colors = {
   darkBlue: '#031C26',
@@ -35,48 +28,75 @@ const colors = {
   orange: '#F2811D',
   red: '#BF1515',
   grayLight: '#ccc',
-  grayDark: '#555',
 };
 
 export default function ProfileScreen() {
   const navigation = useNavigation();
-  const [usuario, setUsuario] = useState<Usuario>(mockUsuario);
+  const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [editando, setEditando] = useState(false);
-  const [novoNome, setNovoNome] = useState(usuario.nome);
-  const [novoTipo, setNovoTipo] = useState(usuario.tipo);
+  const [novoNome, setNovoNome] = useState('');
+  const [novoTipo, setNovoTipo] = useState<Usuario['tipo']>('Voluntário');
 
-  const [estrelas, setEstrelas] = useState(0);
-  const [comentario, setComentario] = useState('');
+  useEffect(() => {
+    async function carregarPerfil() {
+      try {
+        const id = await AsyncStorage.getItem('usuarioId');
+        if (!id) return;
 
-  const salvarEdicao = () => {
-    if (!novoNome.trim()) {
+        const { data } = await api.get(`/usuarios/${id}`);
+        setUsuario(data);
+        setNovoNome(data.nome);
+        setNovoTipo(data.tipo);
+      } catch (error) {
+        Alert.alert('Erro', 'Não foi possível carregar os dados do usuário.');
+        console.error(error);
+      }
+    }
+
+    carregarPerfil();
+  }, []);
+
+  const salvarEdicao = async () => {
+    if (!novoNome.trim() || !usuario) {
       Alert.alert('Erro', 'O nome não pode estar vazio.');
       return;
     }
-    setUsuario({ ...usuario, nome: novoNome, tipo: novoTipo });
-    setEditando(false);
-    Alert.alert('Perfil atualizado', 'As informações foram salvas com sucesso.');
-  };
 
-  const handleLogout = () => {
-    Alert.alert('Logout', 'Você saiu da conta.');
-    navigation.navigate('Login' as never); // ajuste conforme seu tipo de navegação
-  };
+    try {
+      await api.put(`/usuarios/${usuario.id}`, {
+        ...usuario,
+        nome: novoNome,
+        tipo: novoTipo,
+      });
 
-  const enviarFeedback = () => {
-    if (estrelas === 0) {
-      Alert.alert('Aviso', 'Por favor, selecione uma nota.');
-      return;
+      setUsuario({ ...usuario, nome: novoNome, tipo: novoTipo });
+      setEditando(false);
+      Alert.alert('Perfil atualizado com sucesso!');
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível salvar as alterações.');
+      console.error(error);
     }
-    console.log('Feedback enviado:', { estrelas, comentario });
-    Alert.alert('Obrigado!', 'Sua avaliação foi registrada.');
-    setEstrelas(0);
-    setComentario('');
   };
+
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem('usuarioId');
+    Alert.alert('Logout', 'Você saiu da conta.');
+    navigation.navigate('Login' as never);
+  };
+
+  if (!usuario) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.container}>
+          <Text style={{ color: colors.offWhite }}>Carregando perfil...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>Perfil do Usuário</Text>
 
         <View style={styles.infoBox}>
@@ -88,7 +108,6 @@ export default function ProfileScreen() {
               onChangeText={setNovoNome}
               placeholder="Digite seu nome"
               placeholderTextColor={colors.grayLight}
-              selectionColor={colors.gold}
             />
           ) : (
             <Text style={styles.value}>{usuario.nome}</Text>
@@ -101,7 +120,7 @@ export default function ProfileScreen() {
             <View style={styles.pickerWrapper}>
               <Picker
                 selectedValue={novoTipo}
-                onValueChange={setNovoTipo}
+                onValueChange={(value) => setNovoTipo(value)}
                 style={styles.picker}
                 dropdownIconColor={colors.gold}
               >
@@ -118,13 +137,6 @@ export default function ProfileScreen() {
         <View style={styles.infoBox}>
           <Text style={styles.label}>CPF:</Text>
           <Text style={styles.value}>{usuario.cpf}</Text>
-        </View>
-
-        <View style={styles.infoBox}>
-          <Text style={styles.label}>Reputação:</Text>
-          <Text style={styles.value}>
-            {'⭐'.repeat(Math.round(usuario.reputacao))} ({usuario.reputacao})
-          </Text>
         </View>
 
         <View style={styles.buttonContainer}>
@@ -154,49 +166,14 @@ export default function ProfileScreen() {
             </>
           )}
         </View>
-
-        {/* Avaliação do App */}
-        <View style={styles.feedbackSection}>
-          <Text style={styles.title}>Avalie o aplicativo</Text>
-          <View style={styles.starsContainer}>
-            {[1, 2, 3, 4, 5].map((star) => (
-              <TouchableOpacity key={star} onPress={() => setEstrelas(star)}>
-                <Ionicons
-                  name={star <= estrelas ? 'star' : 'star-outline'}
-                  size={36}
-                  color={star <= estrelas ? colors.gold : colors.grayLight}
-                />
-              </TouchableOpacity>
-            ))}
-          </View>
-          <TextInput
-            style={styles.input}
-            placeholder="Deixe seu comentário (opcional)"
-            placeholderTextColor={colors.grayLight}
-            value={comentario}
-            onChangeText={setComentario}
-            multiline
-            numberOfLines={3}
-            textAlignVertical="top"
-          />
-          <TouchableOpacity style={[styles.button, styles.sendButton]} onPress={enviarFeedback}>
-            <Text style={styles.buttonText}>Enviar avaliação</Text>
-          </TouchableOpacity>
-        </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.darkBlue,
-  },
-  container: {
-    flexGrow: 1,
-    padding: 20,
-  },
+  safeArea: { flex: 1, backgroundColor: colors.darkBlue },
+  container: { flexGrow: 1, padding: 20 },
   title: {
     fontSize: 22,
     fontWeight: 'bold',
@@ -204,19 +181,14 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     color: colors.offWhite,
   },
-  infoBox: {
-    marginBottom: 15,
-  },
+  infoBox: { marginBottom: 15 },
   label: {
     fontWeight: 'bold',
     fontSize: 16,
     color: colors.offWhite,
     marginBottom: 4,
   },
-  value: {
-    fontSize: 16,
-    color: colors.offWhite,
-  },
+  value: { fontSize: 16, color: colors.offWhite },
   input: {
     borderWidth: 1,
     borderColor: colors.gold,
@@ -239,44 +211,16 @@ const styles = StyleSheet.create({
     color: colors.offWhite,
     height: 44,
   },
-  buttonContainer: {
-    marginTop: 30,
-  },
+  buttonContainer: { marginTop: 30 },
   button: {
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: 'center',
     marginBottom: 10,
   },
-  buttonText: {
-    color: colors.offWhite,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  editButton: {
-    backgroundColor: colors.gold,
-  },
-  saveButton: {
-    backgroundColor: '#28a745',
-  },
-  cancelButton: {
-    backgroundColor: colors.red,
-  },
-  logoutButton: {
-    backgroundColor: colors.red,
-  },
-  feedbackSection: {
-    marginTop: 40,
-  },
-  starsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: 15,
-  },
-  sendButton: {
-  backgroundColor: colors.orange,
-  marginTop: 12,   
-  marginBottom: 0, 
-},
-
+  buttonText: { color: colors.offWhite, fontSize: 16, fontWeight: 'bold' },
+  editButton: { backgroundColor: colors.gold },
+  saveButton: { backgroundColor: '#28a745' },
+  cancelButton: { backgroundColor: colors.red },
+  logoutButton: { backgroundColor: colors.red },
 });
