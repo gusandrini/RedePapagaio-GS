@@ -36,7 +36,9 @@ export default function CreateOccurrenceScreen() {
     if (ocorrencia) {
       setDescricao(ocorrencia.dsOcorrencia);
       setRegiao(ocorrencia.regiao.nmRegiao);
-      setTipoSelecionado(ocorrencia.tipoOcorrencia.nmTipoOcorrencia);
+      setTipoSelecionado(
+        ocorrencia.tipoOcorrencia.nmTipoOcorrencia ?? ocorrencia.tipoOcorrencia.dsTipoOcorrencia
+      );
     }
   }, [route.params]);
 
@@ -48,7 +50,8 @@ export default function CreateOccurrenceScreen() {
 
     const payload = {
       tipoOcorrencia: {
-        nmTipoOcorrencia: tipoSelecionado,
+        nmTipoOcorrencia: tipoSelecionado!,
+        dsTipoOcorrencia: tipoSelecionado!.replace(/_/g, ' '),
       },
       regiao: { nmRegiao: regiao },
       dsOcorrencia: descricao,
