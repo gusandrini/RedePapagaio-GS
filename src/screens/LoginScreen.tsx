@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TextInput,
-  Button,
   StyleSheet,
   TouchableOpacity,
   Alert,
@@ -12,7 +11,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
-// import api from '../services/api'; // Descomente ao usar requisições reais
+import api from '../services/api'; // agora realmente usando
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
 
@@ -35,16 +34,31 @@ export default function LoginScreen() {
 
     try {
       if (isLogin) {
-        // const response = await api.post('/auth/login', { email, password });
-        Alert.alert('Login realizado com sucesso!');
+        const response = await api.post('/auth/login', {
+          email,
+          senha: password,
+        });
+
+        // Aqui você pode salvar o token com AsyncStorage, se necessário
+        Alert.alert('Sucesso', 'Login realizado com sucesso!');
       } else {
-        // const response = await api.post('/auth/register', { nome, cpf, email, password });
-        Alert.alert('Cadastro realizado com sucesso!');
+        await api.post('/auth/register', {
+          nome,
+          cpf,
+          email,
+          senha: password,
+        });
+
+        Alert.alert('Sucesso', 'Cadastro realizado com sucesso!');
       }
 
       navigation.navigate('Home');
-    } catch (error) {
-      Alert.alert('Erro', 'Verifique seus dados e tente novamente.');
+    } catch (error: any) {
+      console.error('Erro na autenticação:', error);
+      Alert.alert(
+        'Erro',
+        error?.response?.data?.message || 'Verifique seus dados e tente novamente.'
+      );
     } finally {
       setLoading(false);
     }
@@ -76,7 +90,7 @@ export default function LoginScreen() {
       <TextInput
         style={styles.input}
         placeholder="E-mail"
-        placeholderTextColor={colors.offWhite}        
+        placeholderTextColor={colors.offWhite}
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
@@ -98,7 +112,6 @@ export default function LoginScreen() {
           <Text style={styles.buttonText}>{isLogin ? 'Entrar' : 'Cadastrar'}</Text>
         </TouchableOpacity>
       )}
-
 
       <TouchableOpacity onPress={() => setIsLogin(!isLogin)} disabled={loading}>
         <Text style={styles.toggle}>
@@ -163,4 +176,3 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
-
