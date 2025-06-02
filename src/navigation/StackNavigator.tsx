@@ -33,7 +33,7 @@ export default function StackNavigator() {
       <Stack.Screen name="HelpOptions" component={HelpOptionsScreen} />
       <Stack.Screen name="OngDetail" component={OngDetailScreen} />
       <Stack.Screen name="ChatIA" component={ChatIAScreen} />
-      <Stack.Screen name="Feedback" component={FeedbackScreen} />
+      {/* <Stack.Screen name="Feedback" component={FeedbackScreen} /> */}
       <Stack.Screen name="About" component={AboutScreen} />
       <Stack.Screen name="Mapa" component={MapScreen} />
     </Stack.Navigator>
