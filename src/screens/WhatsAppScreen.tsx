@@ -17,7 +17,7 @@ const colors = {
 };
 
 export default function WhatsAppScreen() {
-  const whatsappGroupLink = 'https://chat.whatsapp.com/SEU_LINK_DO_GRUPO_AQUI';
+  const whatsappGroupLink = 'https://chat.whatsapp.com/DOtXbb5X4gNLrW6lwmHHrh';
 
   const entrarNoGrupo = async () => {
     const supported = await Linking.canOpenURL(whatsappGroupLink);
