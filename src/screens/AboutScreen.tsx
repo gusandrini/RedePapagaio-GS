@@ -15,19 +15,27 @@ export default function AboutScreen() {
         <Text style={styles.title}>Sobre a RedePapagaio</Text>
 
         <Text style={styles.text}>
-          A RedePapagaio nasceu com a missão de conectar pessoas em situações extremas — como desastres naturais — a voluntários, ONGs e redes de apoio em tempo real.
+          A <Text style={styles.highlight}>RedePapagaio</Text> é uma plataforma solidária criada para oferecer respostas rápidas, organizadas e humanas em situações de emergência — como enchentes, deslizamentos, incêndios e outros desastres naturais.
         </Text>
 
         <Text style={styles.text}>
-          O nome foi inspirado no papagaio-cinzento africano, uma das poucas espécies conhecidas por demonstrar altruísmo verdadeiro: ele ajuda outros membros da sua espécie sem esperar nada em troca. Assim como eles, acreditamos na empatia como motor de transformação social.
+          Nosso sistema conecta <Text style={styles.highlight}>pessoas afetadas</Text> a <Text style={styles.highlight}>voluntários</Text>, <Text style={styles.highlight}>ONGs</Text> e <Text style={styles.highlight}>instituições de apoio</Text>, utilizando recursos como geolocalização, alertas em tempo real, classificação de risco e um assistente inteligente via chat IA.
         </Text>
 
         <Text style={styles.text}>
-          Combinando tecnologia, geolocalização, chat com IA e integração com instituições sérias, a RedePapagaio busca oferecer respostas rápidas e humanas em momentos críticos.
+          O nome foi inspirado no <Text style={styles.highlight}>papagaio-cinzento africano</Text>, conhecido por sua capacidade rara de ajudar outros sem esperar nada em troca — um símbolo de empatia verdadeira que representa nossos valores.
         </Text>
 
         <Text style={styles.text}>
-          Este projeto foi desenvolvido por estudantes da FIAP como parte do desafio Global Solution — e reflete nosso compromisso com a inovação social, a solidariedade e o uso consciente da tecnologia.
+          Criamos funcionalidades como:
+          {'\n'}• Distribuição inteligente de ONGs pelo mapa nacional
+          {'\n'}• Registro de ocorrências com detalhes de urgência
+          {'\n'}• Cadastro de ajuda realizada vinculada à necessidade de cada local
+          {'\n'}• Integração futura com WhatsApp e notificações
+        </Text>
+
+        <Text style={styles.text}>
+          Este projeto foi desenvolvido por estudantes da FIAP como parte do desafio <Text style={styles.highlight}>Global Solution</Text>, reforçando nosso compromisso com a <Text style={styles.highlight}>inovação social</Text>, <Text style={styles.highlight}>solidariedade</Text> e o <Text style={styles.highlight}>uso ético da tecnologia</Text>.
         </Text>
 
         <Text style={styles.footer}>🦜 Empatia que voa longe.</Text>
@@ -46,7 +54,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.darkBlue,
   },
   title: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
@@ -54,10 +62,14 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 16,
-    marginBottom: 16,
+    marginBottom: 18,
     color: colors.offWhite,
     textAlign: 'justify',
     lineHeight: 24,
+  },
+  highlight: {
+    color: colors.gold,
+    fontWeight: '600',
   },
   footer: {
     marginTop: 30,
