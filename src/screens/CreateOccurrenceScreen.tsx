@@ -49,9 +49,9 @@ export default function CreateOccurrenceScreen() {
     async function carregarDados() {
       try {
         const [resTipos, resRegioes, resNiveis] = await Promise.all([
-          api.get<TipoOcorrencia[]>('/tipos-ocorrencias/todos'),
+          api.get<TipoOcorrencia[]>('/tipos_ocorrencias/todos'),
           api.get<Regiao[]>('/regioes/todas'),
-          api.get<NivelUrgencia[]>('/niveis-urgencia/todos'),
+          api.get<NivelUrgencia[]>('/niveis_urgencias/todos'),
         ]);
         setTipos(resTipos.data);
         setRegioes(resRegioes.data);
@@ -82,7 +82,7 @@ export default function CreateOccurrenceScreen() {
       tipoOcorrencia: { idTipoOcorrencia: tipoSelecionado },
       regiao: { idRegiao: regiaoSelecionada },
       nivelUrgencia: { idNivelUrgencia: nivelSelecionado },
-      statusOcorrencia: { idStatusOcorrencia: 1 }, // Status padrão: "pendente"
+      statusOcorrencia: { idStatusOcorrencia: 1 }, // Status padrão
       dsOcorrencia: descricao,
     };
 
