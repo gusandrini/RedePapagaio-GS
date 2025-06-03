@@ -47,10 +47,10 @@ export default function HelpOptionsScreen() {
         const id = await AsyncStorage.getItem('usuarioId');
         setUsuarioId(id);
 
-        const ocorrenciasResp = await api.get('/ocorrencias');
+        const ocorrenciasResp = await api.get('/ocorrencias/todas');
         setOcorrencias(ocorrenciasResp.data);
 
-        const tiposAjudaResp = await api.get('/tipos-ajuda/todos');
+        const tiposAjudaResp = await api.get('/tipos_ajudas/todos'); // ✅ Correção aqui
         setTiposAjuda(tiposAjudaResp.data);
 
       } catch (error) {
