@@ -1,65 +1,125 @@
-# 🚩 RedePapagaio - Rede Solidária em Situações Extremas
 
----
+# 🦜 RedePapagaio – Rede Solidária em Situações Extremas
 
-## 👥 Integrantes do Grupo
+![GitHub repo size](https://img.shields.io/github/repo-size/gusandrini/RedePapagaio-GS?style=flat-square)
+![GitHub stars](https://img.shields.io/github/stars/gusandrini/RedePapagaio-GS?style=flat-square)
+![GitHub last commit](https://img.shields.io/github/last-commit/gusandrini/RedePapagaio-GS?style=flat-square)
 
-- ✅ **Gustavo Sandrini** (RM 557505) - Turma 2TDSPW  
-- ✅ **Eduarda Tiemi** (RM 554756) - Turma 2TDSPH  
-- ✅ **Felipe Pizzinato** (RM 555141) - Turma 2TDSPH  
+## 📌 Visão Geral
 
----
+O **RedePapagaio** é uma plataforma de apoio em **situações extremas**, como desastres naturais e emergências. Inspirado no altruísmo dos papagaios-cinzentos africanos, o app conecta **vítimas, voluntários e ONGs** em uma rede de solidariedade eficaz, geolocalizada e em tempo real.
 
-## ▶️ Vídeo Demonstrativo  
+## 📽️ Demonstração
 
-Assista ao vídeo da solução no YouTube:  
-🎥 [**Clique aqui para assistir**](https://youtu.be/seu_link_aqui)
+🎥 [**Clique aqui para assistir ao vídeo demonstrativo**](https://youtu.be/seu_link_aqui)
 
----
+## 👥 Integrantes
 
-## 📝 Descrição da Solução
+| Nome              | RM      | Turma    |
+|-------------------|---------|----------|
+| Gustavo Sandrini  | 557505  | 2TDSPW   |
+| Eduarda Tiemi     | 554756  | 2TDSPH   |
+| Felipe Pizzinato  | 555141  | 2TDSPH   |
 
-O **RedePapagaio** é uma plataforma integrada para auxílio em situações de desastres naturais e eventos extremos. Inspirada no comportamento altruísta dos papagaios-cinzentos africanos, que ajudam seus semelhantes sem esperar recompensa, a solução conecta vítimas, voluntários e doadores de forma rápida e eficiente.
+## 🛠️ Funcionalidades
 
-### ⚙️ Funcionalidades principais
+- ✅ Cadastro/login de usuários (vítimas, voluntários, ONGs)
+- ✅ Geolocalização de pedidos e ofertas de ajuda
+- ✅ Integração com APIs oficiais (INMET, Defesa Civil)
+- ✅ Notificações push para alertas e pedidos emergenciais
+- ✅ Chat com IA integrada para suporte em tempo real
+- ✅ Mapa com recursos e ONGs próximas
+- ✅ Sistema de reputação e avaliação de voluntários
+- ✅ Tela "Sobre Nós" com informações da rede
 
-- 🔹 Cadastro e autenticação de usuários, voluntários e ONGs  
-- 🔹 Notificações e alertas meteorológicos integrados ao INMET e Defesa Civil  
-- 🔹 Registro de pedidos e ofertas de ajuda, com geolocalização  
-- 🔹 Chat com inteligência artificial para suporte e orientação  
-- 🔹 Mapa interativo para localizar ONGs e recursos próximos  
-- 🔹 Avaliação de voluntários e feedback sobre a aplicação  
+## 💻 Tecnologias Utilizadas
 
-### 💻 Tecnologias utilizadas
+| Categoria        | Tecnologias                                                   |
+|------------------|----------------------------------------------------------------|
+| Mobile App       | React Native, Expo, Axios, React Navigation                   |
+| Backend API      | Java 21, Spring Boot, Spring Data JPA, Spring Security JWT    |
+| Banco de Dados   | MySQL 8                                                       |
+| Infraestrutura   | Docker, Maven, Postman, Swagger                               |
+| Machine Learning | scikit-learn, pandas, numpy, StandardScaler, RandomForest     |
+| IoT e Integrações| Node-RED, APIs públicas (INMET, Defesa Civil, WhatsApp)       |
+| Visualização     | Matplotlib, Seaborn                                           |
 
-React Native (mobile), API REST com Java Spring Boot, integrações IoT, Docker, entre outras.
+📦 Código da API disponível em: [**github.com/dudatiemiak/redepapagaio-api**](https://github.com/dudatiemiak/redepapagaio-api)
 
----
+## 🚀 Como Rodar o Projeto (Mobile)
 
-## 🚀 Como Rodar o Projeto
+### 1. Clone o repositório
 
-1. 📂 Clone o repositório:  
-   ```bash
-   git clone https://github.com/gusandrini/RedePapagaio-GS.git
-   ```
+```bash
+git clone https://github.com/gusandrini/RedePapagaio-GS.git
+cd RedePapagaio-GS
+```
 
-2. 📦 Instale as dependências:  
-   ```bash
-   cd RedePapagaio-GS
-   npm install
-   ```
+### 2. Instale as dependências
 
-3. ▶️ Inicie o app Expo com tunnel:  
-   ```bash
-   npx expo start --tunnel
-   ```
+```bash
+npm install
+```
 
----
+### 3. Inicie com Expo (modo tunnel)
 
-## 📌 Observação
+```bash
+npx expo start --tunnel
+```
 
-Este projeto foi desenvolvido para o Desafio **Global Solution 2025-1** da FIAP.
+### 4. Configure a URL base da API
 
----
+Altere a URL no arquivo `services/api.ts` para o IP da máquina com o backend:
 
-✉️ Para dúvidas ou suporte, entre em contato com a equipe.
+```ts
+const api = axios.create({
+  baseURL: 'http://SEU_IP_LOCAL:8080/api',
+  headers: { 'Content-Type': 'application/json' }
+});
+```
+
+## 🌐 Endpoints da API
+
+Documentação Swagger disponível em:
+
+```
+http://localhost:8080/swagger-ui/index.html
+```
+
+## 🧪 Testes
+
+- Testes manuais no dispositivo físico via Expo Go
+- Testes de API com Postman e Swagger
+- Testes locais com Docker (container MySQL + backend Spring Boot)
+
+## 📦 Estrutura de Pastas (Mobile)
+
+```
+RedePapagaio-GS/
+├── assets/                 # Ícones e imagens
+├── components/             # Componentes reutilizáveis (ex: AppHeader)
+├── navigation/             # Stack e Tab Navigators
+├── screens/                # Telas (Home, Login, Perfil, etc.)
+├── services/               # Integrações com a API
+├── types/                  # Tipagens personalizadas
+├── App.tsx                 # Entrypoint
+└── package.json
+```
+
+## 📚 Referências
+
+- INMET API: https://portal.inmet.gov.br/
+- Defesa Civil SP: https://defesacivil.sp.gov.br/
+- Expo Documentation: https://docs.expo.dev/
+
+## 📌 Observação Final
+
+Este projeto foi desenvolvido como parte do **Global Solution 2025-1** da FIAP e é fruto da colaboração multidisciplinar entre disciplinas de mobile, backend, banco de dados, arquitetura e IA.
+
+## 📬 Contato
+
+Em caso de dúvidas ou contribuições:
+
+- 💬 Gustavo Sandrini - [GitHub](https://github.com/gusandrini)
+- 💬 Eduarda Tiemi - [GitHub](https://github.com/dudatiemiak)
+- 💬 Felipe Pizzinato - [GitHub](https://github.com/felipepizzinato)
