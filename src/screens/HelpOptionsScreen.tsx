@@ -9,7 +9,7 @@ import {
   Alert,
   TouchableOpacity,
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import Modal from 'react-native-modal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../services/api';
 
@@ -20,7 +20,7 @@ interface Ocorrencia {
 
 interface TipoAjuda {
   idTipoAjuda: number;
-  nmTipoAjuda: string; // Enum textual
+  nmTipoAjuda: string;
 }
 
 const colors = {
@@ -40,6 +40,9 @@ export default function HelpOptionsScreen() {
   const [ocorrenciaSelecionada, setOcorrenciaSelecionada] = useState<number | undefined>(undefined);
   const [tipoAjudaSelecionado, setTipoAjudaSelecionado] = useState<number | undefined>(undefined);
   const [descricao, setDescricao] = useState('');
+
+  const [modalOcorrenciaVisivel, setModalOcorrenciaVisivel] = useState(false);
+  const [modalTipoAjudaVisivel, setModalTipoAjudaVisivel] = useState(false);
 
   useEffect(() => {
     async function carregarDados() {
@@ -62,30 +65,34 @@ export default function HelpOptionsScreen() {
   }, []);
 
   const handleEnviarAjuda = async () => {
-    if (!usuarioId || !ocorrenciaSelecionada || !tipoAjudaSelecionado || !descricao.trim()) {
-      Alert.alert('Erro', 'Preencha todos os campos obrigatórios.');
-      return;
-    }
+  if (!usuarioId || !ocorrenciaSelecionada || !tipoAjudaSelecionado || !descricao.trim()) {
+    Alert.alert('Erro', 'Preencha todos os campos obrigatórios.');
+    return;
+  }
 
-    const payload = {
-      usuario: { idUsuario: Number(usuarioId) },
-      ocorrencia: { idOcorrencia: ocorrenciaSelecionada },
-      tipoAjuda: { idTipoAjuda: tipoAjudaSelecionado },
-      dsAjuda: descricao,
-      dtAjuda: new Date().toISOString().split('T')[0],
-    };
+  const hoje = new Date();
+  const dataFormatada = hoje.toLocaleDateString('sv-SE'); // <-- ✅ formato correto
 
-    try {
-      await api.post('/ajudas/inserir', payload);
-      Alert.alert('Sucesso', 'Ajuda registrada com sucesso!');
-      setOcorrenciaSelecionada(undefined);
-      setTipoAjudaSelecionado(undefined);
-      setDescricao('');
-    } catch (error) {
-      Alert.alert('Erro', 'Falha ao registrar ajuda.');
-      console.error(error);
-    }
+  const payload = {
+    usuario: { idUsuario: Number(usuarioId) },
+    ocorrencia: { idOcorrencia: ocorrenciaSelecionada },
+    tipoAjuda: { idTipoAjuda: tipoAjudaSelecionado },
+    dsAjuda: descricao,
+    dtAjuda: dataFormatada,
   };
+
+  try {
+    await api.post('/ajudas/inserir', payload);
+    Alert.alert('Sucesso', 'Ajuda registrada com sucesso!');
+    setOcorrenciaSelecionada(undefined);
+    setTipoAjudaSelecionado(undefined);
+    setDescricao('');
+  } catch (error) {
+    Alert.alert('Erro', 'Falha ao registrar ajuda.');
+    console.error(error);
+  }
+};
+
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -93,42 +100,56 @@ export default function HelpOptionsScreen() {
         <Text style={styles.title}>Registrar Ajuda</Text>
 
         <Text style={styles.label}>Ocorrência:</Text>
-        <View style={styles.pickerWrapper}>
-          <Picker
-            selectedValue={ocorrenciaSelecionada}
-            onValueChange={(value) => setOcorrenciaSelecionada(value)}
-            style={styles.picker}
-            dropdownIconColor={colors.gold}
-          >
-            <Picker.Item label="Selecione uma ocorrência..." value={undefined} />
+        <TouchableOpacity style={styles.selectBox} onPress={() => setModalOcorrenciaVisivel(true)}>
+          <Text style={styles.selectText}>
+            {ocorrenciaSelecionada
+              ? ocorrencias.find((o) => o.idOcorrencia === ocorrenciaSelecionada)?.dsOcorrencia
+              : 'Selecione uma ocorrência'}
+          </Text>
+        </TouchableOpacity>
+
+        <Modal isVisible={modalOcorrenciaVisivel} onBackdropPress={() => setModalOcorrenciaVisivel(false)}>
+          <View style={styles.modalContent}>
             {ocorrencias.map((oc) => (
-              <Picker.Item
-                key={`oc-${oc.idOcorrencia}`}
-                label={`#${oc.idOcorrencia} - ${oc.dsOcorrencia}`}
-                value={oc.idOcorrencia}
-              />
+              <TouchableOpacity
+                key={oc.idOcorrencia}
+                onPress={() => {
+                  setOcorrenciaSelecionada(oc.idOcorrencia);
+                  setModalOcorrenciaVisivel(false);
+                }}
+                style={styles.modalItem}
+              >
+                <Text style={styles.modalItemText}>{oc.dsOcorrencia}</Text>
+              </TouchableOpacity>
             ))}
-          </Picker>
-        </View>
+          </View>
+        </Modal>
 
         <Text style={styles.label}>Tipo de Ajuda:</Text>
-        <View style={styles.pickerWrapper}>
-          <Picker
-            selectedValue={tipoAjudaSelecionado}
-            onValueChange={(value) => setTipoAjudaSelecionado(value)}
-            style={styles.picker}
-            dropdownIconColor={colors.gold}
-          >
-            <Picker.Item label="Selecione o tipo de ajuda..." value={undefined} />
+        <TouchableOpacity style={styles.selectBox} onPress={() => setModalTipoAjudaVisivel(true)}>
+          <Text style={styles.selectText}>
+            {tipoAjudaSelecionado
+              ? tiposAjuda.find((t) => t.idTipoAjuda === tipoAjudaSelecionado)?.nmTipoAjuda.replace(/_/g, ' ')
+              : 'Selecione um tipo de ajuda'}
+          </Text>
+        </TouchableOpacity>
+
+        <Modal isVisible={modalTipoAjudaVisivel} onBackdropPress={() => setModalTipoAjudaVisivel(false)}>
+          <View style={styles.modalContent}>
             {tiposAjuda.map((tipo) => (
-              <Picker.Item
-                key={`tipo-${tipo.idTipoAjuda}`}
-                label={tipo.nmTipoAjuda.replace(/_/g, ' ')}
-                value={tipo.idTipoAjuda}
-              />
+              <TouchableOpacity
+                key={tipo.idTipoAjuda}
+                onPress={() => {
+                  setTipoAjudaSelecionado(tipo.idTipoAjuda);
+                  setModalTipoAjudaVisivel(false);
+                }}
+                style={styles.modalItem}
+              >
+                <Text style={styles.modalItemText}>{tipo.nmTipoAjuda.replace(/_/g, ' ')}</Text>
+              </TouchableOpacity>
             ))}
-          </Picker>
-        </View>
+          </View>
+        </Modal>
 
         <Text style={styles.label}>Descrição:</Text>
         <TextInput
@@ -174,17 +195,16 @@ const styles = StyleSheet.create({
     color: colors.offWhite,
     textAlignVertical: 'top',
   },
-  pickerWrapper: {
+  selectBox: {
     borderWidth: 1,
     borderColor: colors.gold,
     borderRadius: 8,
-    overflow: 'hidden',
+    padding: 12,
     backgroundColor: '#14394d',
     marginBottom: 10,
   },
-  picker: {
+  selectText: {
     color: colors.offWhite,
-    height: 44,
   },
   button: {
     backgroundColor: colors.orange,
@@ -197,5 +217,17 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 18,
     textAlign: 'center',
+  },
+  modalContent: {
+    backgroundColor: colors.darkBlue,
+    padding: 20,
+    borderRadius: 10,
+  },
+  modalItem: {
+    paddingVertical: 12,
+  },
+  modalItemText: {
+    color: colors.offWhite,
+    fontSize: 16,
   },
 });
