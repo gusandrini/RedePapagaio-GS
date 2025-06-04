@@ -8,7 +8,7 @@ import HelpOptionsScreen from '../screens/HelpOptionsScreen';
 import OngDetailScreen from '../screens/OngDetailScreen';
 import ChatIAScreen from '../screens/ChatIAScreen';
 import MapScreen from '../screens/MapScreen';
-import CreateOccurrenceScreen from '../screens/CreateOccurrenceScreen';
+// import CreateOccurrenceScreen from '../screens/CreateOccurrenceScreen';
 import WhatsAppScreen from '../screens/WhatsAppScreen';
 
 import AppHeader from '../components/AppHeader';
@@ -36,7 +36,7 @@ export default function StackNavigator() {
       <Stack.Screen name="OngDetail" component={OngDetailScreen} />
       <Stack.Screen name="ChatIA" component={ChatIAScreen} />
       <Stack.Screen name="Mapa" component={MapScreen} />
-      <Stack.Screen name="CreateOccurrence" component={CreateOccurrenceScreen} />
+      {/* <Stack.Screen name="CreateOccurrence" component={CreateOccurrenceScreen} /> */}
       <Stack.Screen name="WhatsApp" component={WhatsAppScreen} />
     </Stack.Navigator>
   );

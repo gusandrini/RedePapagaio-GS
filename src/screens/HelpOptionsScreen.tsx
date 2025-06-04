@@ -37,8 +37,8 @@ export default function HelpOptionsScreen() {
   const [ocorrencias, setOcorrencias] = useState<Ocorrencia[]>([]);
   const [tiposAjuda, setTiposAjuda] = useState<TipoAjuda[]>([]);
 
-  const [ocorrenciaSelecionada, setOcorrenciaSelecionada] = useState<number | null>(null);
-  const [tipoAjudaSelecionado, setTipoAjudaSelecionado] = useState<number | null>(null);
+  const [ocorrenciaSelecionada, setOcorrenciaSelecionada] = useState<number | undefined>(undefined);
+  const [tipoAjudaSelecionado, setTipoAjudaSelecionado] = useState<number | undefined>(undefined);
   const [descricao, setDescricao] = useState('');
 
   useEffect(() => {
@@ -50,9 +50,8 @@ export default function HelpOptionsScreen() {
         const ocorrenciasResp = await api.get('/ocorrencias/todas');
         setOcorrencias(ocorrenciasResp.data);
 
-        const tiposAjudaResp = await api.get('/tipos_ajudas/todos'); // ✅ Correção aqui
+        const tiposAjudaResp = await api.get('/tipos_ajudas/todos');
         setTiposAjuda(tiposAjudaResp.data);
-
       } catch (error) {
         Alert.alert('Erro', 'Falha ao carregar dados iniciais.');
         console.error(error);
@@ -73,14 +72,14 @@ export default function HelpOptionsScreen() {
       ocorrencia: { idOcorrencia: ocorrenciaSelecionada },
       tipoAjuda: { idTipoAjuda: tipoAjudaSelecionado },
       dsAjuda: descricao,
-      dtAjuda: new Date().toISOString().split('T')[0], // yyyy-MM-dd
+      dtAjuda: new Date().toISOString().split('T')[0],
     };
 
     try {
       await api.post('/ajudas/inserir', payload);
       Alert.alert('Sucesso', 'Ajuda registrada com sucesso!');
-      setOcorrenciaSelecionada(null);
-      setTipoAjudaSelecionado(null);
+      setOcorrenciaSelecionada(undefined);
+      setTipoAjudaSelecionado(undefined);
       setDescricao('');
     } catch (error) {
       Alert.alert('Erro', 'Falha ao registrar ajuda.');
@@ -101,10 +100,10 @@ export default function HelpOptionsScreen() {
             style={styles.picker}
             dropdownIconColor={colors.gold}
           >
-            <Picker.Item label="Selecione uma ocorrência..." value={null} />
+            <Picker.Item label="Selecione uma ocorrência..." value={undefined} />
             {ocorrencias.map((oc) => (
               <Picker.Item
-                key={oc.idOcorrencia}
+                key={`oc-${oc.idOcorrencia}`}
                 label={`#${oc.idOcorrencia} - ${oc.dsOcorrencia}`}
                 value={oc.idOcorrencia}
               />
@@ -120,11 +119,11 @@ export default function HelpOptionsScreen() {
             style={styles.picker}
             dropdownIconColor={colors.gold}
           >
-            <Picker.Item label="Selecione o tipo de ajuda..." value={null} />
+            <Picker.Item label="Selecione o tipo de ajuda..." value={undefined} />
             {tiposAjuda.map((tipo) => (
               <Picker.Item
-                key={tipo.idTipoAjuda}
-                label={tipo.nmTipoAjuda.replace('_', ' ')}
+                key={`tipo-${tipo.idTipoAjuda}`}
+                label={tipo.nmTipoAjuda.replace(/_/g, ' ')}
                 value={tipo.idTipoAjuda}
               />
             ))}

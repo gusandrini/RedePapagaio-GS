@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RootStackParamList } from '../types/navigation';
 import api from '../services/api';
 
@@ -36,7 +37,6 @@ export default function LoginScreen() {
         const response = await api.get('/usuarios/todos');
         const usuarios = response.data;
 
-        // Comparação com .toLowerCase() para evitar erro com letras maiúsculas
         const usuarioEncontrado = usuarios.find(
           (u: any) =>
             u.nmEmail?.toLowerCase() === email.toLowerCase() &&
@@ -44,6 +44,7 @@ export default function LoginScreen() {
         );
 
         if (usuarioEncontrado) {
+          await AsyncStorage.setItem('usuarioId', String(usuarioEncontrado.idUsuario));
           Alert.alert('Sucesso', 'Login realizado com sucesso!');
           navigation.navigate('Home');
         } else {
@@ -51,22 +52,41 @@ export default function LoginScreen() {
         }
 
       } else {
-        await api.post('/usuarios/inserir', {
+        // ✅ Corrigido para gerar data válida mesmo com fuso horário
+        const hoje = new Date();
+        const dataCadastro = new Date(
+          hoje.getFullYear(),
+          hoje.getMonth(),
+          hoje.getDate()
+        ).toISOString().split('T')[0];
+
+        const novoUsuario = {
           nmUsuario: nome,
           nmEmail: email,
           nmSenha: password,
-          dtCadastro: new Date().toISOString().split('T')[0], // yyyy-MM-dd
-        });
+          dtCadastro: dataCadastro,
+        };
 
-        Alert.alert('Sucesso', 'Cadastro realizado com sucesso!');
-        navigation.navigate('Home');
+        console.log('Cadastro enviado:', novoUsuario);
+
+        const response = await api.post('/usuarios/inserir', novoUsuario);
+        const usuarioCriado = response.data;
+
+        if (usuarioCriado?.idUsuario) {
+          await AsyncStorage.setItem('usuarioId', String(usuarioCriado.idUsuario));
+          Alert.alert('Sucesso', 'Cadastro realizado com sucesso!');
+          navigation.navigate('Home');
+        } else {
+          Alert.alert('Cadastro realizado', 'Faça login para continuar.');
+          setIsLogin(true);
+        }
       }
 
     } catch (error: any) {
-      console.error('Erro na autenticação:', error);
+      console.error('Erro na autenticação:', error.response?.data || error);
       Alert.alert(
         'Erro',
-        error?.response?.data?.message || 'Falha na autenticação. Verifique seus dados.'
+        error?.response?.data?.message || 'Erro interno. Verifique os dados enviados.'
       );
     } finally {
       setLoading(false);

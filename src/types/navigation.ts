@@ -16,6 +16,8 @@ export type RootStackParamList = {
       regiao: {
         idRegiao: number;
         nmRegiao: string;
+        nmCidade: string;
+        nmEstado: string;
       };
       nivelUrgencia: {
         idNivelUrgencia: number;

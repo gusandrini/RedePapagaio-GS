@@ -41,9 +41,12 @@ export default function HomeScreen() {
           <TouchableOpacity
             style={styles.button}
             onPress={() =>
-              navigation.navigate('HelpOptions', {
-                cidade: 'São Paulo',
-                problema: 'Desabamento',
+              navigation.navigate({
+                name: 'HelpOptions',
+                params: {
+                  cidade: 'São Paulo',
+                  problema: 'Desabamento',
+                },
               })
             }
           >
@@ -52,21 +55,28 @@ export default function HomeScreen() {
 
           <TouchableOpacity
             style={styles.button}
-            onPress={() => navigation.navigate('Mapa')}
+            onPress={() => navigation.navigate({ name: 'Mapa', params: undefined })}
           >
             <Text style={styles.buttonText}>🤝 Quero Ajudar (Ver ONGs)</Text>
           </TouchableOpacity>
 
+          {/* <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate({ name: 'CreateOccurrence', params: {} })}
+          >
+            <Text style={styles.buttonText}>📋 Nova Ocorrência</Text>
+          </TouchableOpacity> */}
+
           <TouchableOpacity
             style={styles.button}
-            onPress={() => navigation.navigate('Alertas')}
+            onPress={() => navigation.navigate({ name: 'Alertas', params: undefined })}
           >
             <Text style={styles.buttonText}>⚠️ Alertas Atuais</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.button}
-            onPress={() => navigation.navigate('WhatsApp')}
+            onPress={() => navigation.navigate({ name: 'WhatsApp', params: undefined })}
           >
             <Text style={styles.buttonText}>📱 Comunidade (WhatsApp)</Text>
           </TouchableOpacity>
@@ -86,13 +96,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 8,
-    color: colors.offWhite,
   },
   subtitle: {
     fontSize: 18,
@@ -115,9 +118,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
-  },
-  primaryButton: {
-    backgroundColor: colors.red,
   },
   buttonText: {
     color: colors.offWhite,

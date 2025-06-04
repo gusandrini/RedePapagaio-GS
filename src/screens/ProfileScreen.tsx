@@ -39,14 +39,21 @@ export default function ProfileScreen() {
     async function carregarPerfil() {
       try {
         const id = await AsyncStorage.getItem('usuarioId');
-        if (!id) return;
+        console.log('ID do usuário recuperado:', id);
+
+        if (!id) {
+          Alert.alert('Erro', 'ID do usuário não encontrado.');
+          return;
+        }
 
         const { data } = await api.get(`/usuarios/${id}`);
+        console.log('Dados do usuário recebidos:', data);
+
         setUsuario(data);
-        setNovoNome(data.nmUsuario);
+        setNovoNome(data.nmUsuario || '');
       } catch (error) {
         Alert.alert('Erro', 'Não foi possível carregar os dados do usuário.');
-        console.error(error);
+        console.error('Erro ao carregar perfil:', error);
       }
     }
 
@@ -70,7 +77,7 @@ export default function ProfileScreen() {
       Alert.alert('Perfil atualizado com sucesso!');
     } catch (error) {
       Alert.alert('Erro', 'Não foi possível salvar as alterações.');
-      console.error(error);
+      console.error('Erro ao salvar edição:', error);
     }
   };
 
@@ -99,7 +106,7 @@ export default function ProfileScreen() {
               navigation.navigate('Login' as never);
             } catch (error) {
               Alert.alert('Erro', 'Não foi possível excluir a conta.');
-              console.error(error);
+              console.error('Erro ao excluir conta:', error);
             }
           },
         },
