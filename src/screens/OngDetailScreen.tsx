@@ -27,7 +27,6 @@ export default function OngDetailScreen() {
   const route = useRoute<OngDetailRouteProp>();
   const { id, nome, cidade } = route.params;
 
-  // Geração dinâmica de dados simulados
   const email = `contato@${nome.toLowerCase().replace(/\s/g, '')}.org`;
   const telefone = `(11) 9${id.padStart(4, '0')}000-0000`;
   const descricao = 'ONG atuante em causas sociais, emergenciais e apoio comunitário em situações extremas.';

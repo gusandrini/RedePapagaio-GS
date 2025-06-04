@@ -7,7 +7,6 @@ import {
   FlatList,
   ActivityIndicator,
   Alert,
-  TouchableOpacity,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -28,7 +27,7 @@ interface Alerta {
   };
   nivelUrgencia: {
     idNivelUrgencia: number;
-    nmNivel: string; // enum: GRAVE, MODERADO, LEVE
+    nmNivel: string;
   };
   statusOcorrencia: {
     idStatusOcorrencia: number;
@@ -93,45 +92,6 @@ export default function AlertsScreen() {
     }
   };
 
-  const handleEditar = (ocorrencia: Alerta) => {
-    navigation.navigate('CreateOccurrence', {
-      ocorrencia: {
-        idOcorrencia: ocorrencia.idOcorrencia,
-        tipoOcorrencia: ocorrencia.tipoOcorrencia,
-        regiao: ocorrencia.regiao,
-        nivelUrgencia: ocorrencia.nivelUrgencia,
-        statusOcorrencia: ocorrencia.statusOcorrencia,
-        dsOcorrencia: ocorrencia.dsOcorrencia,
-      },
-    });
-  };
-
-  const confirmarExclusao = (id: number) => {
-    Alert.alert(
-      'Confirmar exclusão',
-      'Tem certeza que deseja excluir esta ocorrência?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Excluir',
-          style: 'destructive',
-          onPress: () => excluirOcorrencia(id),
-        },
-      ]
-    );
-  };
-
-  const excluirOcorrencia = async (id: number) => {
-    try {
-      await api.delete(`/ocorrencias/remover/${id}`);
-      setAlertas((prev) => prev.filter((o) => o.idOcorrencia !== id));
-      Alert.alert('Sucesso', 'Ocorrência excluída com sucesso!');
-    } catch (error) {
-      console.error('Erro ao excluir ocorrência:', error);
-      Alert.alert('Erro', 'Falha ao excluir ocorrência.');
-    }
-  };
-
   if (loading) {
     return (
       <SafeAreaView style={styles.safeArea}>
@@ -171,15 +131,6 @@ export default function AlertsScreen() {
                 Nível: {item.nivelUrgencia.nmNivel}
               </Text>
               <Text style={styles.regiao}>Descrição: {item.dsOcorrencia}</Text>
-
-              <View style={styles.buttonRow}>
-                <TouchableOpacity onPress={() => handleEditar(item)}>
-                  <Text style={styles.editButton}>✏️ Editar</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => confirmarExclusao(item.idOcorrencia)}>
-                  <Text style={styles.deleteButton}>🗑️ Excluir</Text>
-                </TouchableOpacity>
-              </View>
             </View>
           )}
           showsVerticalScrollIndicator={false}
@@ -211,11 +162,4 @@ const styles = StyleSheet.create({
   tipo: { fontSize: 18, fontWeight: 'bold', color: colors.offWhite },
   regiao: { fontSize: 14, color: colors.offWhite, marginBottom: 4 },
   riscoText: { fontWeight: 'bold', fontSize: 14 },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10,
-  },
-  editButton: { color: colors.gold, fontWeight: 'bold' },
-  deleteButton: { color: colors.riscoGrave, fontWeight: 'bold' },
 });

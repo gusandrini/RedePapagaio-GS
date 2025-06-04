@@ -52,7 +52,6 @@ export default function LoginScreen() {
         }
 
       } else {
-        // ✅ Corrigido para gerar data válida mesmo com fuso horário
         const hoje = new Date();
         const dataCadastro = new Date(
           hoje.getFullYear(),

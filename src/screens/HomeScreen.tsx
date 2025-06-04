@@ -60,13 +60,6 @@ export default function HomeScreen() {
             <Text style={styles.buttonText}>🤝 Quero Ajudar (Ver ONGs)</Text>
           </TouchableOpacity>
 
-          {/* <TouchableOpacity
-            style={styles.button}
-            onPress={() => navigation.navigate({ name: 'CreateOccurrence', params: {} })}
-          >
-            <Text style={styles.buttonText}>📋 Nova Ocorrência</Text>
-          </TouchableOpacity> */}
-
           <TouchableOpacity
             style={styles.button}
             onPress={() => navigation.navigate({ name: 'Alertas', params: undefined })}
