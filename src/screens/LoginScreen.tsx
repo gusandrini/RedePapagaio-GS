@@ -13,6 +13,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RootStackParamList } from '../types/navigation';
 import api from '../services/api';
+import axios from 'axios';
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
 
@@ -25,29 +26,31 @@ export default function LoginScreen() {
 
   const navigation = useNavigation<LoginScreenNavigationProp>();
 
+  // Função para autenticar o usuário (login ou cadastro)
   const handleAuth = async () => {
+    // Verifica se os campos obrigatórios estão preenchidos
     if (!email.trim() || !password.trim() || (!isLogin && !nome.trim())) {
       return Alert.alert('Erro', 'Preencha todos os campos obrigatórios.');
     }
-
+    console.log("Passou pelo trim de email e senha")
     setLoading(true);
 
     try {
       if (isLogin) {
-        const response = await api.get('/usuarios/todos');
-        const usuarios = response.data;
+        // Requisição de login para autenticar o usuário e pegar o token JWT
+        console.log("Estou aqui em login")
+        const response = await api.post('/autenticacao/login', { username: email, password });
 
-        const usuarioEncontrado = usuarios.find(
-          (u: any) =>
-            u.nmEmail?.toLowerCase() === email.toLowerCase() &&
-            u.nmSenha === password
-        );
+        const { token } = response.data;
+        console.log('Token recebido:', token); // Log para verificar se o token está vindo
 
-        if (usuarioEncontrado) {
-          await AsyncStorage.setItem('usuarioId', String(usuarioEncontrado.idUsuario));
+        if (token) {
+          // Armazenando o token no AsyncStorage
+          await AsyncStorage.setItem('@AuthData:token', token);
+          console.log('Token armazenado com sucesso:', token);  // Log de sucesso
+
           Alert.alert('Sucesso', 'Login realizado com sucesso!');
           navigation.navigate('Home');
-          // Limpa os campos após o login
           setEmail('');
           setPassword('');
         } else {
@@ -62,36 +65,62 @@ export default function LoginScreen() {
         ).toISOString().split('T')[0];
 
         const novoUsuario = {
+          idUsuario: 0,
           nmUsuario: nome,
-          nmEmail: email,
-          nmSenha: password,
+          nmEmail: email,  // Aqui está o uso correto do campo 'email'
+          nmSenha: password,  // Senha em texto simples
           dtCadastro: dataCadastro,
         };
 
+        console.log(novoUsuario)
+        console.log("Preparando para salvar novo usuário")
+        // Requisição de cadastro de novo usuário
         const response = await api.post('/usuarios/inserir', novoUsuario);
+        // const response = await axios.post('http://liknr60-anonymous-8081.exp.direct:8080/usuarios/inserir', novoUsuario)
+        console.log(`Resposta da função: ${response}`)
+      
         const usuarioCriado = response.data;
+        console.log(`Usuário criado: ${usuarioCriado}`)
 
         if (usuarioCriado?.idUsuario) {
-          await AsyncStorage.setItem('usuarioId', String(usuarioCriado.idUsuario));
-          Alert.alert('Sucesso', 'Cadastro realizado com sucesso!');
-          navigation.navigate('Home');
-          // Limpa os campos após o cadastro
-          setNome('');
-          setEmail('');
-          setPassword('');
+          Alert.alert('Sucesso', 'Cadastro realizado com sucesso! Faça login.');
+          setIsLogin(true);  // Troca para a tela de login
         } else {
-          Alert.alert('Cadastro realizado', 'Faça login para continuar.');
-          setIsLogin(true);
+          Alert.alert('Erro', 'Ocorreu um erro ao cadastrar. Tente novamente.');
         }
+        setNome('');
+        setEmail('');
+        setPassword('');
       }
     } catch (error: any) {
       console.error('Erro na autenticação:', error.response?.data || error);
-      Alert.alert(
-        'Erro',
-        error?.response?.data?.message || 'Erro interno. Verifique os dados enviados.'
-      );
+
+      // Mensagem de erro mais clara para diferentes tipos de falha
+      if (error?.message === 'Network Error') {
+        Alert.alert('Erro de Rede', 'Não foi possível conectar ao servidor. Verifique sua conexão.');
+      } else {
+        Alert.alert(
+          'Erro',
+          error?.response?.data?.message || 'Erro interno. Verifique os dados enviados.'
+        );
+      }
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Função para verificar se o token está armazenado no AsyncStorage
+  const verificarToken = async (): Promise<string | null> => {
+    try {
+      const token = await AsyncStorage.getItem('@AuthData:token');
+      console.log('Token recuperado:', token); // Log para verificar se o token está sendo recuperado
+      if (!token) {
+        throw new Error('Token não encontrado');
+      }
+      return token;
+    } catch (error) {
+      console.error('Erro ao verificar token:', error);
+      return null;
     }
   };
 
