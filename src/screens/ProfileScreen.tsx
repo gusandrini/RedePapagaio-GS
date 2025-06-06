@@ -34,26 +34,25 @@ export default function ProfileScreen() {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [editando, setEditando] = useState(false);
   const [novoNome, setNovoNome] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function carregarPerfil() {
       try {
         const id = await AsyncStorage.getItem('usuarioId');
-        console.log('ID do usuário recuperado:', id);
-
         if (!id) {
           Alert.alert('Erro', 'ID do usuário não encontrado.');
           return;
         }
 
         const { data } = await api.get(`/usuarios/${id}`);
-        console.log('Dados do usuário recebidos:', data);
-
         setUsuario(data);
         setNovoNome(data.nmUsuario || '');
       } catch (error) {
         Alert.alert('Erro', 'Não foi possível carregar os dados do usuário.');
         console.error('Erro ao carregar perfil:', error);
+      } finally {
+        setLoading(false);
       }
     }
 
@@ -114,11 +113,27 @@ export default function ProfileScreen() {
     );
   };
 
-  if (!usuario) {
+  // Formatar a data de cadastro para um formato legível (DD/MM/YYYY)
+  const formatarDataCadastro = (data: string): string => {
+    const [ano, mes, dia] = data.split('-');
+    return `${dia}/${mes}/${ano}`;
+  };
+
+  if (loading) {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.container}>
           <Text style={{ color: colors.offWhite }}>Carregando perfil...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (!usuario) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.container}>
+          <Text style={{ color: colors.offWhite }}>Perfil não encontrado.</Text>
         </View>
       </SafeAreaView>
     );
@@ -151,7 +166,7 @@ export default function ProfileScreen() {
 
         <View style={styles.infoBox}>
           <Text style={styles.label}>Cadastro:</Text>
-          <Text style={styles.value}>{usuario.dtCadastro}</Text>
+          <Text style={styles.value}>{formatarDataCadastro(usuario.dtCadastro)}</Text>
         </View>
 
         <View style={styles.buttonContainer}>

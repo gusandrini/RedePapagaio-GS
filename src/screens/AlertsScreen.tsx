@@ -66,7 +66,7 @@ export default function AlertsScreen() {
     carregarAlertas();
   }, []);
 
-  const getRiscoColor = (nivel: string) => {
+  const getRiscoColor = (nivel: string): string => {
     switch (nivel) {
       case 'LEVE':
         return colors.riscoLeve;
@@ -79,7 +79,7 @@ export default function AlertsScreen() {
     }
   };
 
-  const formatarStatus = (idStatus: number) => {
+  const formatarStatus = (idStatus: number): string => {
     switch (idStatus) {
       case 1:
         return 'Pendente';
@@ -111,22 +111,18 @@ export default function AlertsScreen() {
           keyExtractor={(item) => item.idOcorrencia.toString()}
           renderItem={({ item }) => (
             <View
-              style={[
-                styles.card,
-                { borderLeftColor: getRiscoColor(item.nivelUrgencia.nmNivel) },
-              ]}
+              style={[styles.card, { borderLeftColor: getRiscoColor(item.nivelUrgencia.nmNivel) }]}
             >
               <Text style={styles.id}>ID: {item.idOcorrencia}</Text>
-              <Text style={styles.tipo}>Tipo: {item.tipoOcorrencia.nmTipoOcorrencia.replace(/_/g, ' ')}</Text>
+              <Text style={styles.tipo}>
+                Tipo: {item.tipoOcorrencia.nmTipoOcorrencia.replace(/_/g, ' ')}
+              </Text>
               <Text style={styles.regiao}>Região: {item.regiao.nmRegiao}</Text>
               <Text style={styles.regiao}>
                 Status: {formatarStatus(item.statusOcorrencia.idStatusOcorrencia)}
               </Text>
               <Text
-                style={[
-                  styles.riscoText,
-                  { color: getRiscoColor(item.nivelUrgencia.nmNivel) },
-                ]}
+                style={[styles.riscoText, { color: getRiscoColor(item.nivelUrgencia.nmNivel) }]}
               >
                 Nível: {item.nivelUrgencia.nmNivel}
               </Text>

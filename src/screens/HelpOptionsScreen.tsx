@@ -48,7 +48,11 @@ export default function HelpOptionsScreen() {
     async function carregarDados() {
       try {
         const id = await AsyncStorage.getItem('usuarioId');
-        setUsuarioId(id);
+        if (id) {
+          setUsuarioId(id);
+        } else {
+          Alert.alert('Erro', 'Usuário não encontrado.');
+        }
 
         const ocorrenciasResp = await api.get('/ocorrencias/todas');
         setOcorrencias(ocorrenciasResp.data);
@@ -65,34 +69,34 @@ export default function HelpOptionsScreen() {
   }, []);
 
   const handleEnviarAjuda = async () => {
-  if (!usuarioId || !ocorrenciaSelecionada || !tipoAjudaSelecionado || !descricao.trim()) {
-    Alert.alert('Erro', 'Preencha todos os campos obrigatórios.');
-    return;
-  }
+    if (!usuarioId || !ocorrenciaSelecionada || !tipoAjudaSelecionado || !descricao.trim()) {
+      Alert.alert('Erro', 'Preencha todos os campos obrigatórios.');
+      return;
+    }
 
-  const hoje = new Date();
-  const dataFormatada = hoje.toLocaleDateString('sv-SE'); // <-- ✅ formato correto
+    const hoje = new Date();
+    const dataFormatada = hoje.toLocaleDateString('sv-SE'); // Formato de data no padrão ISO
 
-  const payload = {
-    usuario: { idUsuario: Number(usuarioId) },
-    ocorrencia: { idOcorrencia: ocorrenciaSelecionada },
-    tipoAjuda: { idTipoAjuda: tipoAjudaSelecionado },
-    dsAjuda: descricao,
-    dtAjuda: dataFormatada,
+    const payload = {
+      usuario: { idUsuario: Number(usuarioId) },
+      ocorrencia: { idOcorrencia: ocorrenciaSelecionada },
+      tipoAjuda: { idTipoAjuda: tipoAjudaSelecionado },
+      dsAjuda: descricao,
+      dtAjuda: dataFormatada,
+    };
+
+    try {
+      await api.post('/ajudas/inserir', payload);
+      Alert.alert('Sucesso', 'Ajuda registrada com sucesso!');
+      // Limpa os campos após sucesso
+      setOcorrenciaSelecionada(undefined);
+      setTipoAjudaSelecionado(undefined);
+      setDescricao('');
+    } catch (error) {
+      Alert.alert('Erro', 'Falha ao registrar ajuda.');
+      console.error(error);
+    }
   };
-
-  try {
-    await api.post('/ajudas/inserir', payload);
-    Alert.alert('Sucesso', 'Ajuda registrada com sucesso!');
-    setOcorrenciaSelecionada(undefined);
-    setTipoAjudaSelecionado(undefined);
-    setDescricao('');
-  } catch (error) {
-    Alert.alert('Erro', 'Falha ao registrar ajuda.');
-    console.error(error);
-  }
-};
-
 
   return (
     <SafeAreaView style={styles.safeArea}>

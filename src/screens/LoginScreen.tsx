@@ -47,10 +47,12 @@ export default function LoginScreen() {
           await AsyncStorage.setItem('usuarioId', String(usuarioEncontrado.idUsuario));
           Alert.alert('Sucesso', 'Login realizado com sucesso!');
           navigation.navigate('Home');
+          // Limpa os campos após o login
+          setEmail('');
+          setPassword('');
         } else {
           Alert.alert('Erro', 'Email ou senha inválidos');
         }
-
       } else {
         const hoje = new Date();
         const dataCadastro = new Date(
@@ -66,8 +68,6 @@ export default function LoginScreen() {
           dtCadastro: dataCadastro,
         };
 
-        console.log('Cadastro enviado:', novoUsuario);
-
         const response = await api.post('/usuarios/inserir', novoUsuario);
         const usuarioCriado = response.data;
 
@@ -75,12 +75,15 @@ export default function LoginScreen() {
           await AsyncStorage.setItem('usuarioId', String(usuarioCriado.idUsuario));
           Alert.alert('Sucesso', 'Cadastro realizado com sucesso!');
           navigation.navigate('Home');
+          // Limpa os campos após o cadastro
+          setNome('');
+          setEmail('');
+          setPassword('');
         } else {
           Alert.alert('Cadastro realizado', 'Faça login para continuar.');
           setIsLogin(true);
         }
       }
-
     } catch (error: any) {
       console.error('Erro na autenticação:', error.response?.data || error);
       Alert.alert(
@@ -148,6 +151,7 @@ const colors = {
   gold: '#D9C359',
   orange: '#F2811D',
   red: '#BF1515',
+  grayLight: '#ccc',
 };
 
 const styles = StyleSheet.create({

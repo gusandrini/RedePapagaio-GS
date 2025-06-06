@@ -1,33 +1,12 @@
 export type RootStackParamList = {
   Login: undefined;
   Home: undefined;
-
   HelpOptions: { cidade: string; problema: string };
   OngDetail: { id: string; nome: string; cidade: string };
   ChatIA: undefined;
   Mapa: undefined;
   CreateOccurrence: {
-    ocorrencia?: {
-      idOcorrencia: number;
-      tipoOcorrencia: {
-        idTipoOcorrencia: number;
-        nmTipoOcorrencia: string;
-      };
-      regiao: {
-        idRegiao: number;
-        nmRegiao: string;
-        nmCidade: string;
-        nmEstado: string;
-      };
-      nivelUrgencia: {
-        idNivelUrgencia: number;
-        nmNivel: string;
-      };
-      statusOcorrencia: {
-        idStatusOcorrencia: number;
-      };
-      dsOcorrencia: string;
-    };
+    ocorrencia?: Ocorrencia;
   };
   WhatsApp: undefined;
 };
@@ -39,3 +18,37 @@ export type TabParamList = {
   Perfil: undefined;
   Sobre: undefined;
 };
+
+export interface AuthResponse {
+  token: string;
+}
+
+export interface TipoOcorrencia {
+  idTipoOcorrencia: number;
+  nmTipoOcorrencia: string;
+}
+
+export interface Regiao {
+  idRegiao: number;
+  nmRegiao: string;
+  nmCidade: string;
+  nmEstado: string;
+}
+
+export interface NivelUrgencia {
+  idNivelUrgencia: number;
+  nmNivel: string;
+}
+
+export interface StatusOcorrencia {
+  idStatusOcorrencia: number;
+}
+
+export interface Ocorrencia {
+  idOcorrencia: number;
+  tipoOcorrencia: TipoOcorrencia;
+  regiao: Regiao;
+  nivelUrgencia: NivelUrgencia;
+  statusOcorrencia: StatusOcorrencia;
+  dsOcorrencia: string;
+}
