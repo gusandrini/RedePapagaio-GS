@@ -65,7 +65,6 @@ export default function LoginScreen() {
         ).toISOString().split('T')[0];
 
         const novoUsuario = {
-          idUsuario: 0,
           nmUsuario: nome,
           nmEmail: email,  // Aqui está o uso correto do campo 'email'
           nmSenha: password,  // Senha em texto simples
@@ -78,12 +77,13 @@ export default function LoginScreen() {
         const response = await api.post('/usuarios/inserir', novoUsuario);
         // const response = await axios.post('http://liknr60-anonymous-8081.exp.direct:8080/usuarios/inserir', novoUsuario)
         console.log(`Resposta da função: ${response}`)
-      
         const usuarioCriado = response.data;
         console.log(`Usuário criado: ${usuarioCriado}`)
 
-        if (usuarioCriado?.idUsuario) {
+        if (usuarioCriado != null) {
           Alert.alert('Sucesso', 'Cadastro realizado com sucesso! Faça login.');
+          console.log(`Usuário: ${usuarioCriado!.idUsuario}`)
+          await AsyncStorage.setItem('usuarioId', JSON.stringify(usuarioCriado!.idUsuario))
           setIsLogin(true);  // Troca para a tela de login
         } else {
           Alert.alert('Erro', 'Ocorreu um erro ao cadastrar. Tente novamente.');
