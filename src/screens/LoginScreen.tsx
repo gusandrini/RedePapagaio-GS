@@ -39,7 +39,7 @@ export default function LoginScreen() {
       if (isLogin) {
         // Requisição de login para autenticar o usuário e pegar o token JWT
         console.log("Estou aqui em login")
-        const response = await api.post('/autenticacao/login', { username: email, password });
+        const response = await api.post(`/autenticacao/login?username=${email}&password=${password}`);
 
         const { token } = response.data;
         console.log('Token recebido:', token); // Log para verificar se o token está vindo
