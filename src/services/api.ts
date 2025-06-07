@@ -1,5 +1,8 @@
 import axios from 'axios';
 import { recuperarToken } from './autenticacaoService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Alert } from 'react-native';
+import { reset } from './navigationService';
 
 const api = axios.create({
   baseURL: 'http://192.168.68.111:8080',  
@@ -58,11 +61,20 @@ api.interceptors.response.use(
       message: error.message,
     });
 
-    if (status === 401) {
-      console.error('Token inválido ou expirado. Reautentique-se.');
-      // Você pode redirecionar para a tela de login ou pedir uma nova autenticação aqui
-    } else if (status === 403) {
-      console.error('Acesso proibido. O usuário não tem permissão para acessar este recurso.');
+    if (status === 401 || status === 403) {
+      // Limpa todos os dados armazenados
+      await AsyncStorage.clear();
+      
+      Alert.alert(
+        'Sessão Expirada',
+        'Sua sessão expirou ou você não tem permissão. Por favor, faça login novamente.',
+        [
+          {
+            text: 'OK',
+            onPress: () => reset('Login') // Reseta a navegação para a tela de login
+          }
+        ]
+      );
     } else if (status >= 500) {
       console.error('Erro interno no servidor. Tente novamente mais tarde.');
     }

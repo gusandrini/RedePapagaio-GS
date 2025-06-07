@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import { navigationRef } from './src/services/navigationService';
 import StackNavigator from './src/navigation/StackNavigator';
 import { StatusBar } from 'expo-status-bar';
 import { View, StyleSheet } from 'react-native';
@@ -8,7 +9,7 @@ export default function App() {
   return (
     <View style={styles.container}>
       <StatusBar style="light" backgroundColor="#000" />
-      <NavigationContainer theme={BlackTheme}>
+      <NavigationContainer ref={navigationRef} theme={BlackTheme}>
         <StackNavigator />
       </NavigationContainer>
     </View>

@@ -41,8 +41,9 @@ export default function LoginScreen() {
         console.log("Estou aqui em login")
         const response = await api.post(`/autenticacao/login?username=${email}&password=${password}`);
 
-        const { token } = response.data;
+        const { token, idUsuario } = response.data;
         console.log('Token recebido:', token); // Log para verificar se o token está vindo
+        await AsyncStorage.setItem('usuarioId', JSON.stringify(idUsuario))
 
         if (token) {
           // Armazenando o token no AsyncStorage
